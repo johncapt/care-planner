@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Care planner</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 2px;
+            text-align: center;
+            background-color: lightgrey;
+            font-weight: bold;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .weekEndDay {
+            color: gray;
+        }
+
+        .inThePastDay {
+            filter: grayscale(80%);
+            /* Shader color effect */
+            opacity: 0.75;
+            /* Adjust the opacity as needed (0.0 to 1.0) */
+        }
+
+        .default-period {
+            background-color: white;
+        }
+
+        .green-period {
+            background-color: green;
+        }
+
+        .red-period {
+            background-color: red;
+        }
+
+        h2 {
+            padding: 0;
+            margin-block-start: 0.2em;
+            margin-block-end: 0.2em;
+        }
+
+        .container {
+            padding: 0;
+            margin: 0;
+        }
+
+        .box-summary-parent {
+            padding: 0px;
+        }
+
+        .box-calendar {
+            margin: 0;
+            padding: 0;
+        }
+
+        .bold {
+            background-color: transparent;
+            font-weight: bolder;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+        input,
+        button,
+        textarea {
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            padding: 5px;
+        }
+        select {
+            font-family: 'Courier New', monospace;
+            font-size: 25px;
+            padding: 25px;
+        }
+        input[type="date"] {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            cursor: default;
+            align-items: center;
+            display: inline-flex;
+            overflow: hidden;
+            width: fit-content;
+        }
+
+        div {
+            margin: 0;
+            padding: 0;
+        }
+
+        textarea {
+            min-height: 250px;
+            max-width: 94%;
+            padding: 10px;
+        }
+
+        button {
+            min-width: 70px;
+            float: right;
+            border-radius: 10px;
+        }
+
+        select {
+            font-size: 20px;
+            padding: 5px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: larger;
+        }
+        .green-matching-totals {
+            background-color: greenyellow;
+            color:green;
+        }
+        .no-wrap {
+            white-space: nowrap;
+        }
+
+        .tiny-cell {
+            max-width: 10px;
+            font-size: smaller;
+            padding: 1px;
+            text-align: center;
+        }
+
+        .form-element {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            /* Adjust as needed for spacing between form elements */
+        }
+
+        .form-element label {
+            width: 150px;
+            /* Adjust as needed for label width */
+            margin-right: 10px;
+            /* Adjust as needed for spacing between label and input */
+        }
+
+        /* Optional: Add more specific styling for different input types if needed */
+        .form-element input[type="text"],
+        .form-element input[type="date"],
+        .form-element textarea,
+        .form-element select {
+            width: 100%;
+            /* Make input elements fill the remaining space */
+        }
+    </style>
+</head>
+
+<body>
+    <button id="toggleButton">Back</button>
+    <div id="settingDiv" style="padding-top: 3rem;">
+        <div class="form-element">
+            <label for="startDate">Start date</label>
+            <input type="date" id="startDate" name="startDate" value="">
+        </div>
+        <div class="form-element">
+            <label for="endDate">End date</label>
+            <input type="date" id="endDate" name="endDate" value="">
+        </div>
+        <div class="form-element">
+            <!-- Dropdown list -->
+            <label for="startsWidth">First with</label>
+            <select id="startsWidth" name="startsWidth">
+                <option value="Mum" selected>Mum</option>
+                <option value="Dad">Dad</option>
+            </select>
+        </div>
+
+        <div class="form-element">
+            <label for="textHandovers">Handovers</label>
+            <textarea id="textHandovers" name="textHandovers" rows="2" cols="40"></textarea>
+        </div>
+        <div style="font-size: small;">Format is YYYY-MM-DDThh:mm separated by comma.</div>
+        <button style="width: 100%;" id="restoreDefaultsButton">Restore defaults</button>
+    </div>
+    <div id="careDiv" style="padding-top: 1rem;">
+        <!-- Content for the summary -->
+        <div class="container" id="container">
+            <div class="box-summary-parent" id="summary-box-parent1"></div>
+            <div class="box-summary-parent" id="summary-box-parent2"></div>
+        </div>
+
+        <!-- Content for the calendar -->
+        <div class="box-calendar" id="calendar-box"></div>
+    </div>
+
+    <script>
+        const currentDate = new Date();
+        // set defaults
+        // Array of holidays
+        const DEFAULT_SPECIAL_DAYS = [
+            {
+                day: '2023-12-25',
+                label: "Christmas Day"
+            },
+            {
+                day: '2023-12-26',
+                label: "Boxing Day"
+            },
+            {
+                day:'2024-01-01',
+                label:"New Year's Day"
+            },
+            {
+                day:'2024-01-26',
+                label:"Australia Day"
+            }
+        ];
+        const DEFAULT_START_DATE = '2023-12-14';
+        const DEFAULT_END_DATE = '2024-01-31';
+        const DEFAULT_START_WITH = 'Mum';
+        const DEFAULT_HANDOVERS = [
+            '2023-12-14T15:00', // done
+            '2023-12-17T18:00', // done
+            '2023-12-23T17:00', // done
+            '2023-12-25T17:00',
+            '2024-01-03T18:00',
+            '2024-01-14T17:00',
+            '2024-01-23T14:00',
+            '2024-01-31T09:00'
+        ];
+        let settingDivVisibility = 'hidden'
+        let careDivVisibility = 'visible'
+
+        // Read from local storage
+        let ls_handovers = localStorage.getItem('cp_handovers');
+        let ls_period_start_date = localStorage.getItem('cp_start_date');
+        let ls_period_end_date = localStorage.getItem('cp_end_date');
+        let ls_starts_with = localStorage.getItem('cp_starts_with');
+        if (ls_handovers !== null && ls_period_start_date !== null && ls_period_end_date !== null && ls_starts_with !== null) {
+            document.getElementById("textHandovers").value = ls_handovers
+            document.getElementById("startsWidth").value = ls_starts_with
+            document.getElementById("startDate").value = ls_period_start_date
+            document.getElementById("endDate").value = ls_period_end_date
+        } else {
+            applyDefaults()
+        }
+        function applyDefaults(){
+            // not in local storage, set values from defaults
+            document.getElementById("textHandovers").value = DEFAULT_HANDOVERS
+            document.getElementById("startDate").value = DEFAULT_START_DATE
+            document.getElementById("endDate").value = DEFAULT_END_DATE
+            document.getElementById("startsWidth").value = DEFAULT_START_WITH
+        }
+
+        function build_care_periods() {
+            handovers = document.getElementById("textHandovers").value.split(',')
+            start_with = document.getElementById("startsWidth").value
+            const intervals = [];
+            for (let i = 0; i < handovers.length - 1; i++) {
+                intervals.push({
+                    from: handovers[i],
+                    to: handovers[i + 1],
+                    with: start_with
+                });
+                start_with = start_with === 'Mum' ? 'Dad' : 'Mum';
+            }
+            return intervals;
+        }
+
+        function display_calendar() {
+            const care_periods = build_care_periods();
+            const calendarTitleDiv = document.createElement('div');
+            calendarTitleDiv.innerHTML = `<h2>Calendar</h2>`;
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            const headerCell = headerRow.insertCell();
+            headerCell.textContent = 'Days/Hours';
+            //headerCell.classList.add('day-label')
+            for (let i = 0; i < 24; i++) {
+                const hourCell = headerRow.insertCell();
+                hourCell.textContent = `${i < 10 ? '0' : ''}${i}`;
+                hourCell.classList.add('tiny-cell')
+            }
+            const startDate = new Date(document.getElementById("startDate").value);
+            const endDate = new Date(document.getElementById("endDate").value);
+
+            while (startDate <= endDate) {
+                const row = table.insertRow();
+                const dateCell = row.insertCell();
+                if (isWeekend(startDate)) {
+                    dateCell.classList.add('weekEndDay')
+                }
+                else {
+                    if (startDate > currentDate) {
+                        dateCell.classList.add('bold')
+                    } else {
+                        dateCell.classList.add('inThePastDay')
+                    }
+                }
+                dateCell.textContent = formatCalendarDay(startDate)
+                dateCell.classList.add('no-wrap')
+
+                // Check if the formatted date matches any holiday date
+                const formattedDate = formatShortCalendarDay(startDate);
+                const isHoliday = DEFAULT_SPECIAL_DAYS.some(holiday => holiday.day === formattedDate);
+
+                if (isHoliday) {
+                    const holidayLabel = DEFAULT_SPECIAL_DAYS.find(holiday => holiday.day === formattedDate).label;
+                    console.log(`${formattedDate} is a holiday: ${holidayLabel}`);
+                }
+
+                for (let i = 0; i < 24; i++) {
+                    const hourCell = row.insertCell();
+                    hourCell.classList.add('default-period');
+                    hourCell.id=`calday--cell${formatShortCalendarDay(startDate)}-${i}`
+
+                    // convert date to date time
+                    const startDateTime = new Date(`${startDate.toISOString().split('T')[0]}T${i < 10 ? '0' + i : i}:00`);
+                    if (startDateTime < currentDate) {
+                        hourCell.classList.add('inThePastDay')
+                    }
+
+                    const currentDateTime = new Date(startDate);
+                    currentDateTime.setHours(i);
+                    const carePeriod = care_periods.find(period => {
+                        const from = new Date(period.from);
+                        const to = new Date(period.to);
+                        return currentDateTime >= from && currentDateTime <= to;
+                    });
+                    if (carePeriod) {
+                        hourCell.classList.add(carePeriod.with === 'Dad' ? 'green-period' : 'red-period');
+                    }
+                }
+                startDate.setDate(startDate.getDate() + 1);
+            }
+
+            document.getElementById("calendar-box").appendChild(calendarTitleDiv);
+            document.getElementById("calendar-box").appendChild(table);
+        }
+
+        function isWeekend(date) {
+            const dayOfWeek = date.getDay();
+            return dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday
+        }
+
+        // Function to format date string without seconds and timezone info
+        function formatDateString(date) {
+            let tmpDate = date.toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric' });
+            // Remove spaces from the formatted date string
+            tmpDate = tmpDate.replace(/\s/g, '');
+            // Extract the first three characters
+            const firstThreeChars = tmpDate.substring(0, 3);
+            // Concatenate a space and the rest of the string
+            return firstThreeChars + ' ' + tmpDate.substring(3);
+        }
+
+        // Function to format date string without seconds and timezone info
+        function formatCalendarDay(date) {
+            const options = {
+                weekday: 'short',
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit'
+            };
+            const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+            const [weekday, dateString] = formattedDate.split(', ');
+            const [month, day, year] = dateString.split('/');
+            return `${weekday.substring(0, 1)},${day}/${month}/${year}`;
+        }
+
+        // Function to format date as 'YYYY-MM-DD'
+        function formatShortCalendarDay(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function display_summary() {
+            const summary = {};
+            const care_periods = build_care_periods();
+            // Calculate durations and totals for each parent
+            care_periods.forEach(interval => {
+                const duration = new Date(interval.to) - new Date(interval.from);
+                const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+                if (!summary[interval.with]) {
+                    summary[interval.with] = { durations: [], total: 0 };
+                }
+                summary[interval.with].durations.push({ from: new Date(interval.from), to: new Date(interval.to), duration: `${days}d ${hours}h ${minutes}m` });
+                summary[interval.with].total += duration;
+            });
+
+            // Create and append the summary tables to the document
+            let parent = 0
+            for (const person in summary) {
+                parent++
+                if (summary.hasOwnProperty(person)) {
+                    const personSummary = summary[person];
+                    // Display person information
+                    const personDiv = document.createElement('div');
+                    personDiv.innerHTML = `<h2>${person}</h2>`;
+                    const table = document.createElement('table');
+                    //table.style.minWidth = '381px'; // Set minimum width
+                    const thead = table.createTHead();
+                    const tbody = table.createTBody();
+                    // Table header
+                    const headerRow = thead.insertRow();
+                    headerRow.innerHTML = '<th>From</th><th>To</th><th>Duration</th>';
+                    // Table body
+                    personSummary.durations.forEach(duration => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `<td style="background-color:white" class=${currentDate > duration.to ? '"weekEndDay"' : '"bold"'}>${formatDateString(duration.from)}</td><td style="background-color:white" class=${currentDate > duration.to ? '"weekEndDay"' : '"bold"'}>${formatDateString(duration.to)}</td><td style="background-color:white" class=${currentDate > duration.to ? '"weekEndDay"' : '"bold"'}>${duration.duration}</td>`;
+                    });
+                    // Total row
+                    const totalRow = tbody.insertRow();
+                    totalRow.innerHTML = `<td colspan="2" class="bold">Total</td><td id="total${person}" class="bold">${convertMillisecondsToDuration(personSummary.total)}</td>`;
+                    // Append the table to the document body
+                    document.getElementById(`summary-box-parent${parent}`).appendChild(personDiv);
+                    document.getElementById(`summary-box-parent${parent}`).appendChild(table);
+
+                }
+            }
+            // check if total are same, if yes, add green
+            if (document.getElementById('totalMum').innerText == document.getElementById('totalDad').innerText) {
+                document.getElementById('totalMum').classList.add('green-matching-totals')
+                document.getElementById('totalDad').classList.add('green-matching-totals')
+            } else {
+                document.getElementById('totalMum').classList.remove('green-matching-totals')
+                document.getElementById('totalDad').classList.remove('green-matching-totals')
+            }
+        }
+
+        // Function to convert milliseconds to a human-readable duration
+        function convertMillisecondsToDuration(milliseconds) {
+            const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((milliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            return `${days}d ${hours}h ${minutes}m`;
+        }
+
+
+        function computeAll() {
+
+            // toggle visibility
+            if (document.getElementById('toggleButton').innerHTML == 'Back') {
+                settingDivVisibility = 'none'
+                careDivVisibility = 'block'
+                document.getElementById('toggleButton').innerHTML = '...'
+            } else {
+                settingDivVisibility = 'block'
+                careDivVisibility = 'none'
+                document.getElementById('toggleButton').innerHTML = 'Back'
+            }
+
+            document.getElementById('settingDiv').style.display = settingDivVisibility
+            document.getElementById('careDiv').style.display = careDivVisibility
+
+            // initialize calendar and summary tables
+            document.getElementById('calendar-box').innerHTML = "";
+            document.getElementById('summary-box-parent1').innerHTML = "";
+            document.getElementById('summary-box-parent2').innerHTML = "";
+
+            // Regular expression pattern to check handover dates
+            var pattern = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2},)*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+            // Check if the values match the pattern
+            if (pattern.test(document.getElementById("textHandovers").value)) {
+                display_calendar();
+                display_summary();
+                // save to local storage
+                localStorage.setItem('cp_start_date', document.getElementById("startDate").value);
+                localStorage.setItem('cp_end_date', document.getElementById("endDate").value);
+                localStorage.setItem('cp_starts_with', document.getElementById("startsWidth").value);
+                localStorage.setItem('cp_handovers', document.getElementById("textHandovers").value);
+            }
+            else {
+                document.getElementById('calendar-box').innerHTML = "<div style='color:red'>Handovers are not in the correct format of YYYY-MM-DDThh:mm separated by commas. Check entries and try again.</div>";
+            }
+            fillHolidays(DEFAULT_SPECIAL_DAYS)
+        }
+        function restaureDefaults() {
+            if (window.confirm("Are you sure you want to restaure defaults?")) {
+                // Remove the item from localStorage
+                localStorage.removeItem('cp_start_date');
+                localStorage.removeItem('cp_end_date');
+                localStorage.removeItem('cp_starts_with');
+                localStorage.removeItem('cp_handovers');
+                applyDefaults()
+                computeAll()
+            }
+        }
+        function fillHolidays(holidays) {
+            holidays.forEach(holiday => {
+                const holidayDate = new Date(holiday.day);
+                const formattedDate = formatShortCalendarDay(holidayDate);
+                // Find the cells in the row corresponding to each hour
+                for (let hour = 0; hour <= 23; hour++) {
+                    const cellId = `calday--cell${formattedDate}-${hour}`;
+                    const cell = document.getElementById(cellId);
+                    if (cell) {
+                        // Update the cell content with the holiday label
+                        cell.textContent = holiday.label.charAt(hour) || '';
+                    }
+                }
+            });
+        }
+        computeAll()
+
+        // Add a click event listener to the button
+        document.getElementById('toggleButton').addEventListener('click', function () {
+            computeAll()
+        });
+        document.getElementById('restoreDefaultsButton').addEventListener('click', function () {
+            restaureDefaults()
+        });
+    </script>
+</body>
+
+</html>
