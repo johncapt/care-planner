@@ -319,6 +319,11 @@
             return intervals;
         }
 
+        // Custom sorting function to sort date strings
+        const compareDates = (a, b) => {
+            return new Date(a) - new Date(b);
+        };
+
         function display_calendar() {
             const care_periods = build_care_periods();
             const calendarTitleDiv = document.createElement('div');
@@ -563,9 +568,11 @@
         function addDatetime() {
             const datetimeInput = document.getElementById('datetimeInput');
             const newDatetime = datetimeInput.value;
-            if (newDatetime) {
+            if (newDatetime && !ls_handovers.includes(newDatetime)) {
                 ls_handovers.push(newDatetime);
-                appendDatetimeItem(newDatetime);
+                // Sort the date array using the custom sorting function
+                ls_handovers = ls_handovers.sort(compareDates);
+                updateHandoverDisplay();
                 datetimeInput.value = "";
             }
         }
