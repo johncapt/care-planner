@@ -149,6 +149,7 @@
             border-radius: 10px;
             background-color: dodgerblue;
             color: white;
+            font-weight: bold;
         }
 
         label {
@@ -211,6 +212,16 @@
                 <button onclick="addDatetime()">+</button>
                 <div>&nbsp;</div>
                 <div id="handoverList"></div>
+            </fieldset>
+        </div>
+        <div>
+            <fieldset>
+                <legend>Special Days</legend>
+                <input type="date" id="dateInputSpecialDay">
+                <input type="text" id="labelInputSpecialDay">
+                <button onclick="">+</button>
+                <div>&nbsp;</div>
+                <div id="specialDaysList">(TO DO...)</div>
             </fieldset>
         </div>
         <button style="width: 100%;margin-top: 1rem;" id="restoreDefaultsButton">Restore defaults</button>
