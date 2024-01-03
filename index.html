@@ -9,7 +9,6 @@
     <style>
         body {
             font-family: 'Courier New', monospace;
-            font-size: 13px;
             padding: 0;
         }
 
@@ -25,6 +24,7 @@
             text-align: center;
             background-color: lightgrey;
             font-weight: bold;
+            font-size: small;
         }
 
         th {
@@ -44,6 +44,9 @@
 
         .default-period {
             background-color: white;
+            white-space: nowrap;
+            width: 7px;
+            font-size: x-small;
         }
 
         .green-period {
@@ -91,10 +94,18 @@
             padding: 5px;
         }
 
+        legend {
+            font-family: 'Courier New', monospace;
+            font-size: 21px;
+            font-weight: bold;
+            padding: 5px;
+        }
+
         select {
             font-family: 'Courier New', monospace;
-            font-size: 25px;
-            padding: 25px;
+            min-width: 165px;
+            font-size: 20px;
+            padding: 5px;
         }
 
         input[type="date"] {
@@ -104,18 +115,16 @@
             align-items: center;
             display: inline-flex;
             overflow: hidden;
-            width: fit-content;
+            /* min-width: 230px; */
         }
 
         input[type="datetime-local" i] {
             font-family: 'Courier New', monospace;
             padding-inline-start: 1px;
             cursor: default;
-            align-items: self-start;
-            display: inline-flex;
-            overflow: hidden;
-            padding: 0px;
-            size: 100px;
+            padding: 4px;
+            max-width: 275px;
+            font-size: 21px;
         }
 
         div {
@@ -135,11 +144,6 @@
             border-radius: 10px;
         }
 
-        select {
-            font-size: 20px;
-            padding: 5px;
-        }
-
         label {
             font-weight: bold;
             font-size: larger;
@@ -150,38 +154,37 @@
             color: green;
         }
 
-        .no-wrap {
+        .day-cell {
             white-space: nowrap;
+            width: 80px;
+            font-size: smaller;
         }
-
-        .tiny-cell {
+        /* .hour-cell {
+            white-space: nowrap;
+            width: 3px;
+            font-size: xx-small;
+        } */
+        /* .tiny-cell {
             max-width: 10px;
             font-size: smaller;
             padding: 1px;
             text-align: center;
-        }
+        } */
 
         .form-element {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            /* Adjust as needed for spacing between form elements */
         }
 
         .form-element label {
-            width: 150px;
-            /* Adjust as needed for label width */
-            margin-right: 10px;
-            /* Adjust as needed for spacing between label and input */
+            min-width: 230px;
+            font-weight: bold;
         }
 
-        /* Optional: Add more specific styling for different input types if needed */
-        .form-element input[type="text"],
-        .form-element input[type="date"],
-        .form-element textarea,
-        .form-element select {
-            width: 100%;
-            /* Make input elements fill the remaining space */
+        fieldset {
+            font-family: 'Courier New', monospace;
+            max-width: 100em;
         }
     </style>
 </head>
@@ -206,13 +209,15 @@
             </select>
         </div>
         <div>
-            <label for="datetimeInput">Handovers:</label>
-            <input type="datetime-local" id="datetimeInput">
-            <button onclick="addDatetime()">+</button>
-            <div>&nbsp;</div>
-            <div id="handoverList"></div>
+            <fieldset>
+                <legend>Handovers</legend>
+                <input type="datetime-local" id="datetimeInput">
+                <button onclick="addDatetime()">+</button>
+                <div>&nbsp;</div>
+                <div id="handoverList"></div>
+            </fieldset>
         </div>
-        <button style="width: 100%;" id="restoreDefaultsButton">Restore defaults</button>
+        <button style="width: 100%;margin-top: 1rem;" id="restoreDefaultsButton">Restore defaults</button>
     </div>
     <div id="careDiv" style="padding-top: 1rem;">
         <!-- Content for the summary -->
@@ -305,12 +310,17 @@
             const table = document.createElement('table');
             const headerRow = table.insertRow();
             const headerCell = headerRow.insertCell();
-            headerCell.textContent = 'Days/Hours';
-            for (let i = 0; i < 24; i++) {
-                const hourCell = headerRow.insertCell();
-                hourCell.textContent = `${i < 10 ? '0' : ''}${i}`;
-                hourCell.classList.add('tiny-cell')
-            }
+            headerCell.textContent = 'Days';
+            // for (let i = 0; i < 24; i++) {
+            //     const hourCell = headerRow.insertCell();
+            //     hourCell.textContent = `${i < 10 ? '0' : ''}${i}`;
+            //     hourCell.classList.add('tiny-cell')
+            // }
+            const hoursCellHeader = headerRow.insertCell();
+            hoursCellHeader.colSpan = 24;
+            hoursCellHeader.textContent = `Hours (0 to 23)`;
+            
+
             const startDate = new Date(document.getElementById("startDate").value);
             const endDate = new Date(document.getElementById("endDate").value);
 
@@ -328,7 +338,7 @@
                     }
                 }
                 dateCell.textContent = formatCalendarDay(startDate)
-                dateCell.classList.add('no-wrap')
+                dateCell.classList.add('day-cell')
 
                 // Check if the formatted date matches any holiday date
                 const formattedDate = formatShortCalendarDay(startDate);
@@ -341,6 +351,7 @@
                 for (let i = 0; i < 24; i++) {
                     const hourCell = row.insertCell();
                     hourCell.classList.add('default-period');
+                    //hourCell.classList.add('hour-cell')
                     hourCell.id = `calday--cell${formatShortCalendarDay(startDate)}-${i}`
 
                     // convert date to date time
@@ -561,16 +572,16 @@
         function appendDatetimeItem(datetime) {
             const handoverList = document.getElementById('handoverList');
             const handover = document.createElement('div');
-            handover.className = 'form-element'; //JFC
+            handover.className = 'form-element';
             handover.innerHTML = `
-            <label style="width:85em" for="btn${datetime}">${formatDateString(new Date(datetime))}</label>
-                <button id="btn${datetime}" onclick="removeDatetime('${datetime}')">-</button>
+            <label style="font-weight:normal;min-width:295px;" for="btn${datetime}">${formatDateString(new Date(datetime))}</label>
+                <button id="btn${datetime}" onclick="removeHandover('${datetime}')">-</button>
             `;
             handoverList.appendChild(handover);
         }
 
         // Function to remove a specific datetime from the array
-        function removeDatetime(datetime) {
+        function removeHandover(datetime) {
             const index = ls_handovers.indexOf(datetime);
             if (index !== -1) {
                 ls_handovers.splice(index, 1);
