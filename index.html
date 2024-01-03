@@ -31,6 +31,11 @@
             background-color: #f2f2f2;
         }
 
+        .btn-remove {
+            background-color: red;
+            color: white;
+        }
+
         .weekEndDay {
             color: gray;
         }
@@ -47,6 +52,7 @@
             white-space: nowrap;
             width: 7px;
             font-size: x-small;
+            color: white;
         }
 
         .green-period {
@@ -115,7 +121,6 @@
             align-items: center;
             display: inline-flex;
             overflow: hidden;
-            /* min-width: 230px; */
         }
 
         input[type="datetime-local" i] {
@@ -139,9 +144,11 @@
         }
 
         button {
-            min-width: 70px;
+            min-width: 75px;
             float: right;
             border-radius: 10px;
+            background-color: dodgerblue;
+            color: white;
         }
 
         label {
@@ -159,17 +166,6 @@
             width: 80px;
             font-size: smaller;
         }
-        /* .hour-cell {
-            white-space: nowrap;
-            width: 3px;
-            font-size: xx-small;
-        } */
-        /* .tiny-cell {
-            max-width: 10px;
-            font-size: smaller;
-            padding: 1px;
-            text-align: center;
-        } */
 
         .form-element {
             display: flex;
@@ -289,7 +285,6 @@
         }
 
         function build_care_periods() {
-            //let handovers = ls_handovers.split(',')
             let start_with = document.getElementById("startsWidth").value
             const intervals = [];
             for (let i = 0; i < ls_handovers.length - 1; i++) {
@@ -311,16 +306,10 @@
             const headerRow = table.insertRow();
             const headerCell = headerRow.insertCell();
             headerCell.textContent = 'Days';
-            // for (let i = 0; i < 24; i++) {
-            //     const hourCell = headerRow.insertCell();
-            //     hourCell.textContent = `${i < 10 ? '0' : ''}${i}`;
-            //     hourCell.classList.add('tiny-cell')
-            // }
             const hoursCellHeader = headerRow.insertCell();
             hoursCellHeader.colSpan = 24;
             hoursCellHeader.textContent = `Hours (0 to 23)`;
             
-
             const startDate = new Date(document.getElementById("startDate").value);
             const endDate = new Date(document.getElementById("endDate").value);
 
@@ -351,7 +340,6 @@
                 for (let i = 0; i < 24; i++) {
                     const hourCell = row.insertCell();
                     hourCell.classList.add('default-period');
-                    //hourCell.classList.add('hour-cell')
                     hourCell.id = `calday--cell${formatShortCalendarDay(startDate)}-${i}`
 
                     // convert date to date time
@@ -442,7 +430,6 @@
                     const personDiv = document.createElement('div');
                     personDiv.innerHTML = `<h2>${person}</h2>`;
                     const table = document.createElement('table');
-                    //table.style.minWidth = '381px'; // Set minimum width
                     const thead = table.createTHead();
                     const tbody = table.createTBody();
                     // Table header
@@ -575,7 +562,7 @@
             handover.className = 'form-element';
             handover.innerHTML = `
             <label style="font-weight:normal;min-width:295px;" for="btn${datetime}">${formatDateString(new Date(datetime))}</label>
-                <button id="btn${datetime}" onclick="removeHandover('${datetime}')">-</button>
+                <button id="btn${datetime}" class="btn-remove" onclick="removeHandover('${datetime}')">-</button>
             `;
             handoverList.appendChild(handover);
         }
