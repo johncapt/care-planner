@@ -90,11 +90,13 @@
             font-size: 22px;
             padding: 5px;
         }
+
         select {
             font-family: 'Courier New', monospace;
             font-size: 25px;
             padding: 25px;
         }
+
         input[type="date"] {
             font-family: 'Courier New', monospace;
             font-size: 20px;
@@ -103,6 +105,17 @@
             display: inline-flex;
             overflow: hidden;
             width: fit-content;
+        }
+
+        input[type="datetime-local" i] {
+            font-family: 'Courier New', monospace;
+            padding-inline-start: 1px;
+            cursor: default;
+            align-items: self-start;
+            display: inline-flex;
+            overflow: hidden;
+            padding: 0px;
+            size: 100px;
         }
 
         div {
@@ -131,10 +144,12 @@
             font-weight: bold;
             font-size: larger;
         }
+
         .green-matching-totals {
             background-color: greenyellow;
-            color:green;
+            color: green;
         }
+
         .no-wrap {
             white-space: nowrap;
         }
@@ -184,18 +199,19 @@
         </div>
         <div class="form-element">
             <!-- Dropdown list -->
-            <label for="startsWidth">First with</label>
+            <label for="startsWidth">Starts with</label>
             <select id="startsWidth" name="startsWidth">
                 <option value="Mum" selected>Mum</option>
                 <option value="Dad">Dad</option>
             </select>
         </div>
-
-        <div class="form-element">
-            <label for="textHandovers">Handovers</label>
-            <textarea id="textHandovers" name="textHandovers" rows="2" cols="40"></textarea>
+        <div>
+            <label for="datetimeInput">Handovers:</label>
+            <input type="datetime-local" id="datetimeInput">
+            <button onclick="addDatetime()">+</button>
+            <div>&nbsp;</div>
+            <div id="handoverList"></div>
         </div>
-        <div style="font-size: small;">Format is YYYY-MM-DDThh:mm separated by comma.</div>
         <button style="width: 100%;" id="restoreDefaultsButton">Restore defaults</button>
     </div>
     <div id="careDiv" style="padding-top: 1rem;">
@@ -211,7 +227,6 @@
 
     <script>
         const currentDate = new Date();
-        // set defaults
         // Array of holidays
         const DEFAULT_SPECIAL_DAYS = [
             {
@@ -223,21 +238,21 @@
                 label: "Boxing Day"
             },
             {
-                day:'2024-01-01',
-                label:"New Year's Day"
+                day: '2024-01-01',
+                label: "New Year's Day"
             },
             {
-                day:'2024-01-26',
-                label:"Australia Day"
+                day: '2024-01-26',
+                label: "Australia Day"
             }
         ];
         const DEFAULT_START_DATE = '2023-12-14';
         const DEFAULT_END_DATE = '2024-01-31';
         const DEFAULT_START_WITH = 'Mum';
         const DEFAULT_HANDOVERS = [
-            '2023-12-14T15:00', // done
-            '2023-12-17T18:00', // done
-            '2023-12-23T17:00', // done
+            '2023-12-14T15:00',
+            '2023-12-17T18:00',
+            '2023-12-23T17:00',
             '2023-12-25T17:00',
             '2024-01-03T18:00',
             '2024-01-14T17:00',
@@ -253,29 +268,29 @@
         let ls_period_end_date = localStorage.getItem('cp_end_date');
         let ls_starts_with = localStorage.getItem('cp_starts_with');
         if (ls_handovers !== null && ls_period_start_date !== null && ls_period_end_date !== null && ls_starts_with !== null) {
-            document.getElementById("textHandovers").value = ls_handovers
+            ls_handovers = ls_handovers.split(',')
             document.getElementById("startsWidth").value = ls_starts_with
             document.getElementById("startDate").value = ls_period_start_date
             document.getElementById("endDate").value = ls_period_end_date
         } else {
             applyDefaults()
         }
-        function applyDefaults(){
+        function applyDefaults() {
             // not in local storage, set values from defaults
-            document.getElementById("textHandovers").value = DEFAULT_HANDOVERS
+            ls_handovers = DEFAULT_HANDOVERS
             document.getElementById("startDate").value = DEFAULT_START_DATE
             document.getElementById("endDate").value = DEFAULT_END_DATE
             document.getElementById("startsWidth").value = DEFAULT_START_WITH
         }
 
         function build_care_periods() {
-            handovers = document.getElementById("textHandovers").value.split(',')
-            start_with = document.getElementById("startsWidth").value
+            //let handovers = ls_handovers.split(',')
+            let start_with = document.getElementById("startsWidth").value
             const intervals = [];
-            for (let i = 0; i < handovers.length - 1; i++) {
+            for (let i = 0; i < ls_handovers.length - 1; i++) {
                 intervals.push({
-                    from: handovers[i],
-                    to: handovers[i + 1],
+                    from: ls_handovers[i],
+                    to: ls_handovers[i + 1],
                     with: start_with
                 });
                 start_with = start_with === 'Mum' ? 'Dad' : 'Mum';
@@ -291,7 +306,6 @@
             const headerRow = table.insertRow();
             const headerCell = headerRow.insertCell();
             headerCell.textContent = 'Days/Hours';
-            //headerCell.classList.add('day-label')
             for (let i = 0; i < 24; i++) {
                 const hourCell = headerRow.insertCell();
                 hourCell.textContent = `${i < 10 ? '0' : ''}${i}`;
@@ -322,13 +336,12 @@
 
                 if (isHoliday) {
                     const holidayLabel = DEFAULT_SPECIAL_DAYS.find(holiday => holiday.day === formattedDate).label;
-                    console.log(`${formattedDate} is a holiday: ${holidayLabel}`);
                 }
 
                 for (let i = 0; i < 24; i++) {
                     const hourCell = row.insertCell();
                     hourCell.classList.add('default-period');
-                    hourCell.id=`calday--cell${formatShortCalendarDay(startDate)}-${i}`
+                    hourCell.id = `calday--cell${formatShortCalendarDay(startDate)}-${i}`
 
                     // convert date to date time
                     const startDateTime = new Date(`${startDate.toISOString().split('T')[0]}T${i < 10 ? '0' + i : i}:00`);
@@ -458,7 +471,6 @@
 
 
         function computeAll() {
-
             // toggle visibility
             if (document.getElementById('toggleButton').innerHTML == 'Back') {
                 settingDivVisibility = 'none'
@@ -469,7 +481,6 @@
                 careDivVisibility = 'none'
                 document.getElementById('toggleButton').innerHTML = 'Back'
             }
-
             document.getElementById('settingDiv').style.display = settingDivVisibility
             document.getElementById('careDiv').style.display = careDivVisibility
 
@@ -481,19 +492,17 @@
             // Regular expression pattern to check handover dates
             var pattern = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2},)*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
             // Check if the values match the pattern
-            if (pattern.test(document.getElementById("textHandovers").value)) {
+            if (pattern.test(ls_handovers)) {
                 display_calendar();
                 display_summary();
                 // save to local storage
                 localStorage.setItem('cp_start_date', document.getElementById("startDate").value);
                 localStorage.setItem('cp_end_date', document.getElementById("endDate").value);
                 localStorage.setItem('cp_starts_with', document.getElementById("startsWidth").value);
-                localStorage.setItem('cp_handovers', document.getElementById("textHandovers").value);
-            }
-            else {
-                document.getElementById('calendar-box').innerHTML = "<div style='color:red'>Handovers are not in the correct format of YYYY-MM-DDThh:mm separated by commas. Check entries and try again.</div>";
+                localStorage.setItem('cp_handovers', ls_handovers);
             }
             fillHolidays(DEFAULT_SPECIAL_DAYS)
+            updateHandoverDisplay()
         }
         function restaureDefaults() {
             if (window.confirm("Are you sure you want to restaure defaults?")) {
@@ -530,6 +539,45 @@
         document.getElementById('restoreDefaultsButton').addEventListener('click', function () {
             restaureDefaults()
         });
+
+        // Function to add a new datetime to the array
+        function addDatetime() {
+            const datetimeInput = document.getElementById('datetimeInput');
+            const newDatetime = datetimeInput.value;
+            if (newDatetime) {
+                ls_handovers.push(newDatetime);
+                appendDatetimeItem(newDatetime);
+                datetimeInput.value = "";
+            }
+        }
+
+        // Function to update the display area with the current array values
+        function updateHandoverDisplay() {
+            document.getElementById('handoverList').innerHTML = "";
+            ls_handovers.forEach(datetime => { appendDatetimeItem(datetime); });
+        }
+
+        // Function to append a datetime item to the display area
+        function appendDatetimeItem(datetime) {
+            const handoverList = document.getElementById('handoverList');
+            const handover = document.createElement('div');
+            handover.className = 'form-element'; //JFC
+            handover.innerHTML = `
+            <label style="width:85em" for="btn${datetime}">${formatDateString(new Date(datetime))}</label>
+                <button id="btn${datetime}" onclick="removeDatetime('${datetime}')">-</button>
+            `;
+            handoverList.appendChild(handover);
+        }
+
+        // Function to remove a specific datetime from the array
+        function removeDatetime(datetime) {
+            const index = ls_handovers.indexOf(datetime);
+            if (index !== -1) {
+                ls_handovers.splice(index, 1);
+                updateHandoverDisplay();
+            }
+        }
+
     </script>
 </body>
 
