@@ -248,38 +248,40 @@
     </div>
 
     <script>
+        const YearN0 = 2024;
+        const YearN1 = 2025;
         const currentDate = new Date();
         // Array of holidays
         const DEFAULT_SPECIAL_DAYS = [
             {
-                day: '2023-12-25',
+                day: `${YearN0}2023-12-25`,
                 label: "Christmas Day"
             },
             {
-                day: '2023-12-26',
+                day: `${YearN0}2023-12-26`,
                 label: "Boxing Day"
             },
             {
-                day: '2024-01-01',
+                day: `${YearN1}2024-01-01`,
                 label: "New Year's Day"
             },
             {
-                day: '2024-01-26',
+                day: `${YearN1}2024-01-26`,
                 label: "Australia Day"
             }
         ];
-        const DEFAULT_START_DATE = '2023-12-14';
-        const DEFAULT_END_DATE = '2024-01-31';
+        const DEFAULT_START_DATE = `${YearN0}-12-09`;
+        const DEFAULT_END_DATE = `${YearN1}-01-31`;
         const DEFAULT_START_WITH = 'Mum';
         const DEFAULT_HANDOVERS = [
-            '2023-12-14T15:00',
-            '2023-12-17T18:00',
-            '2023-12-23T17:00',
-            '2023-12-25T17:00',
-            '2024-01-03T18:00',
-            '2024-01-14T17:00',
-            '2024-01-23T14:00',
-            '2024-01-31T09:00'
+            `${YearN0}-12-14T15:00`,
+            `${YearN0}-12-17T18:00`,
+            `${YearN0}-12-23T17:00`,
+            `${YearN0}-12-25T17:00`,
+            `${YearN1}-01-03T18:00`,
+            `${YearN1}-01-14T17:00`,
+            `${YearN1}-01-23T14:00`,
+            `${YearN1}-01-31T09:00`
         ];
         let settingDivVisibility = 'hidden'
         let careDivVisibility = 'visible'
@@ -335,7 +337,7 @@
             const hoursCellHeader = headerRow.insertCell();
             hoursCellHeader.colSpan = 24;
             hoursCellHeader.textContent = `Hours (0 to 23)`;
-            
+
             const startDate = new Date(document.getElementById("startDate").value);
             const endDate = new Date(document.getElementById("endDate").value);
 
