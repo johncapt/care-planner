@@ -252,11 +252,11 @@
         // Array of holidays
         const DEFAULT_SPECIAL_DAYS = [
             {
-                day: '2023-12-25',
+                day: '2024-12-25',
                 label: "Christmas Day"
             },
             {
-                day: '2023-12-26',
+                day: '2024-12-26',
                 label: "Boxing Day"
             },
             {
@@ -268,17 +268,18 @@
                 label: "Australia Day"
             }
         ];
-        const DEFAULT_START_DATE = '2024-12-14';
-        const DEFAULT_END_DATE = '2025-02-05';
+
+        const DEFAULT_START_DATE = '2024-12-12'; // Thursday 12 December 2024 15:00 
+        const DEFAULT_END_DATE = '2025-02-05'; // Wednesday 5 February 2025 09:00
         const DEFAULT_START_WITH = 'Mum';
         const DEFAULT_HANDOVERS = [
-            '2024-12-21T09:30', 
-            '2024-12-23T17:00',
-            '2024-12-25T17:00',
-            '2025-01-03T18:00',
-            '2025-01-14T17:00',
-            '2025-01-23T14:00',
-            '2025-01-31T09:00'
+            '2024-12-19T15:00',
+            '2024-12-26T15:00',
+            '2025-01-02T15:00',
+            '2025-01-09T15:00',
+            '2025-01-16T15:00',
+            '2025-01-23T15:00',
+            '2025-01-30T15:00'
         ];
         let settingDivVisibility = 'hidden'
         let careDivVisibility = 'visible'
@@ -304,17 +305,28 @@
             document.getElementById("startsWidth").value = DEFAULT_START_WITH
         }
 
-        function build_care_periods() {
-            let start_with = document.getElementById("startsWidth").value
+        // Build care periods
+        function build_care_periods(startWith = DEFAULT_START_WITH) {
             const intervals = [];
-            for (let i = 0; i < ls_handovers.length - 1; i++) {
+            let currentWith = startWith;
+            let previousDate = DEFAULT_START_DATE;
+            // Loop through handovers
+            for (let i = 0; i < DEFAULT_HANDOVERS.length; i++) {
                 intervals.push({
-                    from: ls_handovers[i],
-                    to: ls_handovers[i + 1],
-                    with: start_with
+                    from: previousDate,
+                    to: DEFAULT_HANDOVERS[i],
+                    with: currentWith
                 });
-                start_with = start_with === 'Mum' ? 'Dad' : 'Mum';
+                // Switch parent
+                currentWith = currentWith === 'Mum' ? 'Dad' : 'Mum';
+                previousDate = DEFAULT_HANDOVERS[i];
             }
+            // Add final period to end date
+            intervals.push({
+                from: previousDate,
+                to: DEFAULT_END_DATE,
+                with: currentWith
+            });
             return intervals;
         }
 
@@ -446,6 +458,7 @@
             });
 
             // Create and append the summary tables to the document
+            console.info(summary);
             let parent = 0
             for (const person in summary) {
                 parent++
