@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Care planner</title>
+    <title>Care planner 2024-2025</title>
     <style>
         body {
             font-family: Verdana, sans-serif;
@@ -193,7 +193,7 @@
 </head>
 
 <body>
-    <button id="toggleButton">Back</button>
+    <button id="toggleButton" style="display: none;">Back</button>
     <div id="settingDiv" style="padding-top: 3rem;">
         <div class="form-element">
             <label for="startDate">Start date</label>
@@ -220,20 +220,6 @@
                 <div id="handoverList"></div>
             </fieldset>
         </div>
-        <!-- <div>
-            <fieldset>
-                <legend>Special Days</legend>
-                <div class="form-element">
-                    <label for="dateInputSpecialDay">Date</label>
-                    <input type="date" id="dateInputSpecialDay">
-                    <label for="labelInputSpecialDay">Label</label>
-                    <input type="text" id="labelInputSpecialDay" placeholder="Enter a label">
-                </div>
-                <button onclick="" disabled>+</button>
-                <div>&nbsp;</div>
-                <div id="specialDaysList">(TO DO...)</div>
-            </fieldset>
-        </div> -->
         <button style="width: 100%;margin-top: 1rem;" id="restoreDefaultsButton">Restore defaults</button>
     </div>
     <div id="careDiv" style="padding-top: 1rem;">
@@ -269,8 +255,8 @@
             }
         ];
 
-        const DEFAULT_START_DATE = '2024-12-12T15:00'; // Thursday 12 December 2024 15:00 
-        const DEFAULT_END_DATE = '2025-02-05T09:00'; // Wednesday 5 February 2025 09:00
+        let DEFAULT_START_DATE = '2024-12-12'; // added  15:00 
+        let DEFAULT_END_DATE = '2025-02-05'; // Wednesday 5 February 2025 09:00
         const DEFAULT_START_WITH = 'Mum';
         const DEFAULT_HANDOVERS = [
             '2024-12-19T15:00',
@@ -541,15 +527,15 @@
             updateHandoverDisplay()
         }
         function restaureDefaults() {
-            if (window.confirm("Are you sure you want to restaure defaults?")) {
-                // Remove the item from localStorage
-                localStorage.removeItem('cp_start_date');
-                localStorage.removeItem('cp_end_date');
-                localStorage.removeItem('cp_starts_with');
-                localStorage.removeItem('cp_handovers');
-                applyDefaults()
-                computeAll()
-            }
+            // if (window.confirm("Are you sure you want to restaure defaults?")) {
+            // Remove the item from localStorage
+            localStorage.removeItem('cp_start_date');
+            localStorage.removeItem('cp_end_date');
+            localStorage.removeItem('cp_starts_with');
+            localStorage.removeItem('cp_handovers');
+            applyDefaults()
+            computeAll()
+            // }
         }
         function fillHolidays(holidays) {
             holidays.forEach(holiday => {
@@ -615,7 +601,10 @@
                 updateHandoverDisplay();
             }
         }
-
+        restaureDefaults();
+        DEFAULT_START_DATE = '2024-12-12T15:00'; // added  15:00 
+        DEFAULT_END_DATE = '2025-02-05T09:00'; // Wednesday 5 February 2025 09:00
+        computeAll();
     </script>
 </body>
 
