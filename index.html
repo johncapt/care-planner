@@ -66,11 +66,23 @@
             margin-bottom: 1rem;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .date-range-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            padding: 1rem;
             margin-bottom: 1rem;
+        }
+
+        .date-range-info h3 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .date-range-info p {
+            margin: 0.25rem 0;
+            color: #424242;
         }
 
         label {
@@ -326,11 +338,16 @@
             border: 1px solid #c3e6cb;
         }
 
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+        .warning-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid #ffeaa7;
+        }
 
+        @media (max-width: 768px) {
             .summary-container {
                 grid-template-columns: 1fr;
             }
@@ -366,19 +383,15 @@
         <div id="errorContainer"></div>
 
         <div id="settingsPanel" class="settings-panel hidden">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="startDate">Start Date</label>
-                    <input type="datetime-local" id="startDate" name="startDate">
-                </div>
-                <div class="form-group">
-                    <label for="endDate">End Date</label>
-                    <input type="datetime-local" id="endDate" name="endDate">
-                </div>
+            <div id="dateRangeInfo" class="date-range-info">
+                <h3>Calculated Date Range</h3>
+                <p><strong>Start:</strong> <span id="calculatedStart">-</span></p>
+                <p><strong>End:</strong> <span id="calculatedEnd">-</span></p>
+                <p><em>These dates are automatically calculated from your handover times</em></p>
             </div>
 
             <div class="form-group">
-                <label for="startsWith">Starts With</label>
+                <label for="startsWith">Care Period Starts With</label>
                 <select id="startsWith" name="startsWith">
                     <option value="Mum">Mum</option>
                     <option value="Dad">Dad</option>
@@ -386,7 +399,7 @@
             </div>
 
             <div class="fieldset">
-                <div class="fieldset-legend">Handovers</div>
+                <div class="fieldset-legend">Handover Times</div>
                 <div class="handover-input">
                     <input type="datetime-local" id="handoverInput" placeholder="Select handover time">
                     <button type="button" class="btn btn-primary" onclick="addHandover()">Add</button>
@@ -426,14 +439,14 @@
         class CarePlannerApp {
             constructor() {
                 this.state = {
-                    startDate: '2025-07-28T15:00',
-                    endDate: '2025-08-10T09:00',
                     startsWith: 'Mum',
                     handovers: [
+                        '2025-07-28T15:00',
                         '2025-07-31T15:00',
                         '2025-08-03T18:00',
                         '2025-08-06T19:00',
-                        '2025-08-09T10:00'
+                        '2025-08-09T10:00',
+                        '2025-08-10T09:00'
                     ],
                     specialDays: [
                         { day: '2024-12-25', label: "Christmas Day" },
@@ -455,8 +468,6 @@
 
             bindEvents() {
                 document.getElementById('toggleButton').addEventListener('click', () => this.toggleSettings());
-                document.getElementById('startDate').addEventListener('change', (e) => this.updateState('startDate', e.target.value));
-                document.getElementById('endDate').addEventListener('change', (e) => this.updateState('endDate', e.target.value));
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
@@ -464,10 +475,9 @@
             }
 
             loadDefaults() {
-                document.getElementById('startDate').value = this.state.startDate;
-                document.getElementById('endDate').value = this.state.endDate;
                 document.getElementById('startsWith').value = this.state.startsWith;
                 this.updateHandoverDisplay();
+                this.updateDateRangeDisplay();
             }
 
             updateState(key, value) {
@@ -501,52 +511,65 @@
                 setTimeout(() => container.innerHTML = '', 3000);
             }
 
-            validateDates() {
-                const start = new Date(this.state.startDate);
-                const end = new Date(this.state.endDate);
-                
-                if (start >= end) {
-                    this.showError('End date must be after start date');
+            showWarning(message) {
+                const container = document.getElementById('errorContainer');
+                container.innerHTML = `<div class="warning-message">${message}</div>`;
+                setTimeout(() => container.innerHTML = '', 4000);
+            }
+
+            calculateDateRange() {
+                if (this.state.handovers.length < 2) {
+                    return { startDate: null, endDate: null };
+                }
+
+                const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
+                return {
+                    startDate: sortedHandovers[0],
+                    endDate: sortedHandovers[sortedHandovers.length - 1]
+                };
+            }
+
+            updateDateRangeDisplay() {
+                const { startDate, endDate } = this.calculateDateRange();
+                const startElement = document.getElementById('calculatedStart');
+                const endElement = document.getElementById('calculatedEnd');
+
+                if (startDate && endDate) {
+                    startElement.textContent = this.formatDateTime(startDate);
+                    endElement.textContent = this.formatDateTime(endDate);
+                } else {
+                    startElement.textContent = 'Add at least 2 handovers';
+                    endElement.textContent = 'Add at least 2 handovers';
+                }
+            }
+
+            validateHandovers() {
+                if (this.state.handovers.length < 2) {
+                    this.showError('You need at least 2 handover times to create a care schedule');
                     return false;
                 }
-
-                for (const handover of this.state.handovers) {
-                    const handoverDate = new Date(handover);
-                    if (handoverDate <= start || handoverDate >= end) {
-                        this.showError('All handovers must be between start and end dates');
-                        return false;
-                    }
-                }
-
                 return true;
             }
 
             buildCarePeriods() {
-                if (!this.validateDates()) return [];
+                if (!this.validateHandovers()) return [];
 
+                const { startDate, endDate } = this.calculateDateRange();
                 const periods = [];
                 let currentParent = this.state.startsWith;
-                let previousDate = this.state.startDate;
 
                 // Sort handovers chronologically
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
 
-                for (const handover of sortedHandovers) {
+                // Create periods between consecutive handovers
+                for (let i = 0; i < sortedHandovers.length - 1; i++) {
                     periods.push({
-                        from: previousDate,
-                        to: handover,
+                        from: sortedHandovers[i],
+                        to: sortedHandovers[i + 1],
                         with: currentParent
                     });
                     currentParent = currentParent === 'Mum' ? 'Dad' : 'Mum';
-                    previousDate = handover;
                 }
-
-                // Final period
-                periods.push({
-                    from: previousDate,
-                    to: this.state.endDate,
-                    with: currentParent
-                });
 
                 return periods;
             }
@@ -591,15 +614,22 @@
                 this.state.handovers.sort((a, b) => new Date(a) - new Date(b));
                 input.value = '';
                 this.updateHandoverDisplay();
+                this.updateDateRangeDisplay();
                 this.render();
                 this.showSuccess('Handover added successfully');
             }
 
             removeHandover(handover) {
+                if (this.state.handovers.length <= 2) {
+                    this.showWarning('You need at least 2 handover times for a care schedule');
+                    return;
+                }
+
                 const index = this.state.handovers.indexOf(handover);
                 if (index !== -1) {
                     this.state.handovers.splice(index, 1);
                     this.updateHandoverDisplay();
+                    this.updateDateRangeDisplay();
                     this.render();
                     this.showSuccess('Handover removed successfully');
                 }
@@ -609,7 +639,10 @@
                 const container = document.getElementById('handoverList');
                 container.innerHTML = '';
 
-                this.state.handovers.forEach(handover => {
+                // Sort handovers for display
+                const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
+
+                sortedHandovers.forEach(handover => {
                     const item = document.createElement('div');
                     item.className = 'handover-item';
                     item.innerHTML = `
@@ -689,6 +722,9 @@
                 const periods = this.buildCarePeriods();
                 if (periods.length === 0) return;
 
+                const { startDate, endDate } = this.calculateDateRange();
+                if (!startDate || !endDate) return;
+
                 const container = document.getElementById('calendarContainer');
                 const table = document.createElement('table');
                 table.className = 'calendar-table';
@@ -704,11 +740,11 @@
                 table.appendChild(headerRow);
 
                 // Generate calendar rows
-                const startDate = new Date(this.state.startDate);
-                const endDate = new Date(this.state.endDate);
-                let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                let currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
 
-                while (currentDate <= endDate) {
+                while (currentDate <= end) {
                     const row = document.createElement('tr');
                     
                     // Day header
@@ -765,14 +801,14 @@
 
             restoreDefaults() {
                 this.state = {
-                    startDate: '2025-07-28T15:00',
-                    endDate: '2025-08-10T09:00',
                     startsWith: 'Mum',
                     handovers: [
+                        '2025-07-28T15:00',
                         '2025-07-31T15:00',
                         '2025-08-03T18:00',
                         '2025-08-06T19:00',
-                        '2025-08-09T10:00'
+                        '2025-08-09T10:00',
+                        '2025-08-10T09:00'
                     ],
                     specialDays: [
                         { day: '2024-12-25', label: "Christmas Day" },
