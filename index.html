@@ -242,45 +242,72 @@
         .calendar-container {
             background: white;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 0.75rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow-x: auto;
         }
 
-        .calendar-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        .calendar-table th,
-        .calendar-table td {
+        .calendar-day {
+            margin-bottom: 0.5rem;
             border: 1px solid #dee2e6;
-            padding: 2px;
-            text-align: center;
-            font-size: 0.75rem;
+            border-radius: 4px;
+            overflow: hidden;
         }
 
-        .calendar-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
-            padding: 0.5rem 2px;
+        .calendar-day:last-child {
+            margin-bottom: 0;
         }
 
         .day-header {
-            background: #e9ecef !important;
+            background: #f8f9fa;
+            padding: 0.4rem 0.75rem;
             font-weight: 600;
-            writing-mode: vertical-lr;
-            text-orientation: mixed;
-            width: 60px;
-            font-size: 0.7rem;
+            color: #333;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.85rem;
+        }
+
+        .day-timeline {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 0;
+            background: #fff;
         }
 
         .hour-cell {
-            width: 15px;
-            height: 20px;
+            height: 24px;
+            background: #fff;
             transition: opacity 0.2s;
+            position: relative;
+            border-right: 1px solid #f0f0f0;
+        }
+
+        .hour-cell:last-child {
+            border-right: none;
+        }
+
+        .hour-labels {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 0;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hour-label {
+            background: transparent;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #666;
+            padding: 0.2rem 0;
+            font-weight: 500;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .hour-label:last-child {
+            border-right: none;
         }
 
         .mum-period {
@@ -303,20 +330,20 @@
 
         .legend {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
             flex-wrap: wrap;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .legend-color {
-            width: 20px;
-            height: 15px;
+            width: 16px;
+            height: 12px;
             border-radius: 2px;
         }
 
@@ -350,15 +377,55 @@
         @media (max-width: 768px) {
             .summary-container {
                 grid-template-columns: 1fr;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
             }
 
             .header {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 0.75rem;
+                padding: 0.75rem;
             }
 
             .container {
                 padding: 0.5rem;
+            }
+
+            .calendar-container {
+                padding: 0.5rem;
+            }
+
+            .calendar-day {
+                margin-bottom: 0.25rem;
+            }
+
+            .day-header {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .hour-cell {
+                height: 20px;
+            }
+
+            .hour-label {
+                font-size: 0.6rem;
+                padding: 0.15rem 0;
+            }
+
+            .summary-card {
+                padding: 0.75rem;
+            }
+
+            .summary-card h2 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .summary-table th,
+            .summary-table td {
+                padding: 0.3rem;
+                font-size: 0.8rem;
             }
         }
 
@@ -593,7 +660,7 @@
 
             formatCalendarDay(date) {
                 const options = { weekday: 'short', day: '2-digit', month: '2-digit' };
-                return new Intl.DateTimeFormat('en-US', options).format(date);
+                return new Intl.DateTimeFormat('en-AU', options).format(date);
             }
 
             addHandover() {
@@ -726,36 +793,43 @@
                 if (!startDate || !endDate) return;
 
                 const container = document.getElementById('calendarContainer');
-                const table = document.createElement('table');
-                table.className = 'calendar-table';
+                container.innerHTML = '';
 
-                // Create header row
-                const headerRow = document.createElement('tr');
-                headerRow.innerHTML = '<th class="day-header">Day</th>';
+                // Create hour labels (only once at the top)
+                const hourLabelsDiv = document.createElement('div');
+                hourLabelsDiv.className = 'hour-labels';
+                
                 for (let hour = 0; hour < 24; hour++) {
-                    const th = document.createElement('th');
-                    th.textContent = hour.toString().padStart(2, '0');
-                    headerRow.appendChild(th);
+                    const hourLabel = document.createElement('div');
+                    hourLabel.className = 'hour-label';
+                    hourLabel.textContent = hour.toString().padStart(2, '0');
+                    hourLabelsDiv.appendChild(hourLabel);
                 }
-                table.appendChild(headerRow);
+                container.appendChild(hourLabelsDiv);
 
-                // Generate calendar rows
+                // Generate calendar days
                 const start = new Date(startDate);
                 const end = new Date(endDate);
                 let currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
 
                 while (currentDate <= end) {
-                    const row = document.createElement('tr');
+                    // Create day container
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'calendar-day';
                     
                     // Day header
-                    const dayCell = document.createElement('td');
-                    dayCell.className = 'day-header';
-                    dayCell.textContent = this.formatCalendarDay(currentDate);
-                    row.appendChild(dayCell);
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = this.formatCalendarDay(currentDate);
+                    dayDiv.appendChild(dayHeader);
+
+                    // Timeline for this day
+                    const timeline = document.createElement('div');
+                    timeline.className = 'day-timeline';
 
                     // Hour cells
                     for (let hour = 0; hour < 24; hour++) {
-                        const cell = document.createElement('td');
+                        const cell = document.createElement('div');
                         cell.className = 'hour-cell';
                         
                         const cellDateTime = new Date(currentDate);
@@ -781,15 +855,13 @@
                             cell.title = holiday.label;
                         }
 
-                        row.appendChild(cell);
+                        timeline.appendChild(cell);
                     }
 
-                    table.appendChild(row);
+                    dayDiv.appendChild(timeline);
+                    container.appendChild(dayDiv);
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
-
-                container.innerHTML = '';
-                container.appendChild(table);
             }
 
             render() {
