@@ -246,25 +246,51 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .calendar-day {
+        .month-section {
+            margin-bottom: 1rem;
+        }
+
+        .month-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .month-header {
+            background: #007bff;
+            color: white;
+            padding: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 4px;
             margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.25rem;
             border: 1px solid #dee2e6;
             border-radius: 4px;
             overflow: hidden;
+            padding: 0.25rem;
         }
 
         .calendar-day:last-child {
             margin-bottom: 0;
         }
 
-        .day-header {
+        .day-number {
             background: #f8f9fa;
-            padding: 0.4rem 0.75rem;
+            padding: 0.25rem 0.5rem;
             font-weight: 600;
             color: #333;
             text-align: center;
-            border-bottom: 1px solid #dee2e6;
-            font-size: 0.85rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            min-width: 32px;
+            border: 1px solid #e9ecef;
         }
 
         .day-timeline {
@@ -272,10 +298,11 @@
             grid-template-columns: repeat(24, 1fr);
             gap: 0;
             background: #fff;
+            flex: 1;
         }
 
         .hour-cell {
-            height: 24px;
+            height: 20px;
             background: #fff;
             transition: opacity 0.2s;
             position: relative;
@@ -288,34 +315,38 @@
 
         .hour-labels {
             display: grid;
-            grid-template-columns: repeat(24, 1fr);
-            gap: 0;
+            grid-template-columns: auto repeat(24, 1fr);
+            gap: 0.5rem;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 4px;
             margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            align-items: center;
+        }
+
+        .hour-labels-spacer {
+            min-width: 32px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #999;
+            font-weight: 500;
         }
 
         .hour-label {
             background: transparent;
             text-align: center;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #666;
-            padding: 0.2rem 0;
             font-weight: 500;
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .hour-label:last-child {
-            border-right: none;
         }
 
         .mum-period {
-            background: #28a745;
+            background: #dc3545;
         }
 
         .dad-period {
-            background: #dc3545;
+            background: #28a745;
         }
 
         .holiday-cell {
@@ -799,6 +830,12 @@
                 const hourLabelsDiv = document.createElement('div');
                 hourLabelsDiv.className = 'hour-labels';
                 
+                // Spacer for day number column
+                const spacer = document.createElement('div');
+                spacer.className = 'hour-labels-spacer';
+                spacer.textContent = 'Hr';
+                hourLabelsDiv.appendChild(spacer);
+                
                 for (let hour = 0; hour < 24; hour++) {
                     const hourLabel = document.createElement('div');
                     hourLabel.className = 'hour-label';
@@ -807,21 +844,41 @@
                 }
                 container.appendChild(hourLabelsDiv);
 
-                // Generate calendar days
+                // Group days by month
                 const start = new Date(startDate);
                 const end = new Date(endDate);
                 let currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                
+                let currentMonth = null;
+                let monthSection = null;
 
                 while (currentDate <= end) {
+                    const monthYear = currentDate.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
+                    
+                    // Create new month section if needed
+                    if (currentMonth !== monthYear) {
+                        currentMonth = monthYear;
+                        
+                        monthSection = document.createElement('div');
+                        monthSection.className = 'month-section';
+                        
+                        const monthHeader = document.createElement('div');
+                        monthHeader.className = 'month-header';
+                        monthHeader.textContent = monthYear;
+                        monthSection.appendChild(monthHeader);
+                        
+                        container.appendChild(monthSection);
+                    }
+
                     // Create day container
                     const dayDiv = document.createElement('div');
                     dayDiv.className = 'calendar-day';
                     
-                    // Day header
-                    const dayHeader = document.createElement('div');
-                    dayHeader.className = 'day-header';
-                    dayHeader.textContent = this.formatCalendarDay(currentDate);
-                    dayDiv.appendChild(dayHeader);
+                    // Day number
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = currentDate.getDate();
+                    dayDiv.appendChild(dayNumber);
 
                     // Timeline for this day
                     const timeline = document.createElement('div');
@@ -859,7 +916,7 @@
                     }
 
                     dayDiv.appendChild(timeline);
-                    container.appendChild(dayDiv);
+                    monthSection.appendChild(dayDiv);
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             }
