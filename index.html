@@ -32,6 +32,7 @@
             color: white;
             border: none;
             padding: 0.5rem 1rem;
+            min-height: 3rem;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
@@ -43,7 +44,7 @@
         .navigation-panel {
             background: white;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: .5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
         }
@@ -82,6 +83,17 @@
         .handover-input input {
             flex: 1;
         }
+        .holiday-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .holiday-input input[type="date"] {
+            flex: 1;
+        }
+        .holiday-input input[type="text"] {
+            flex: 2;
+        }
         .btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -115,6 +127,24 @@
             border-radius: 4px;
         }
         .handover-item:last-child {
+            margin-bottom: 0;
+        }
+        #holidayDateInput {
+            max-width: 135px;
+        }
+        #holidayLabelInput {
+            max-width: 190px;
+        }
+        .holiday-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.1rem;
+            margin-bottom: 0.25rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .holiday-item:last-child {
             margin-bottom: 0;
         }
         .summary-container {
@@ -341,6 +371,17 @@
             </div>
             <button type="button" class="btn btn-secondary" onclick="restoreDefaults()">Restore Defaults</button>
         </div>
+        <div id="publicHolidaysPanel" class="navigation-panel hidden">
+            <div>
+                <div class="fieldset-legend">Public Holidays</div>
+                <div class="holiday-input">
+                    <input type="date" id="holidayDateInput" placeholder="Select date">
+                    <input type="text" id="holidayLabelInput" placeholder="Holiday name">
+                    <button type="button" class="btn btn-primary" onclick="addHoliday()">+</button>
+                </div>
+                <div id="holidayList"></div>
+            </div>
+        </div>
         <div id="mainContent">
             <div id="summaryPanel" class="summary-container hidden"></div>
             <div id="calendar-container">
@@ -398,17 +439,25 @@
 
             bindEvents() {
                 document.getElementById('handOverButton').addEventListener('click', () => this.toggleView('handover'));
+                document.getElementById('publicHolidaysButton').addEventListener('click', () => this.toggleView('publicholidays'));
                 document.getElementById('summaryButton').addEventListener('click', () => this.toggleView('summary'));
                 document.getElementById('calendarButton').addEventListener('click', () => this.toggleView('calendar'));
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
                 });
+                // document.getElementById('holidayDateInput').addEventListener('keypress', (e) => {
+                //     if (e.key === 'Enter') this.addHoliday();
+                // });
+                // document.getElementById('holidayLabelInput').addEventListener('keypress', (e) => {
+                //     if (e.key === 'Enter') this.addHoliday();
+                // });
             }
 
             loadDefaults() {
                 document.getElementById('startsWith').value = this.state.startsWith;
                 this.updateHandoverDisplay();
+                this.updateHolidayDisplay();
             }
 
             updateState(key, value) {
@@ -423,26 +472,37 @@
                 const buttons = document.querySelectorAll('.nav-button');
                 buttons.forEach(button => {
                     button.classList.remove('active');
-                    if (button.id === `${viewName}Button`) {
-                        button.classList.add('active');
-                    }
                 });
+                
+                if (viewName === 'handover') {
+                    document.getElementById('handOverButton').classList.add('active');
+                } else if (viewName === 'publicholidays') {
+                    document.getElementById('publicHolidaysButton').classList.add('active');
+                } else if (viewName === 'summary') {
+                    document.getElementById('summaryButton').classList.add('active');
+                } else if (viewName === 'calendar') {
+                    document.getElementById('calendarButton').classList.add('active');
+                }
 
                 this.currentView = viewName;
                 
                 // Get all panels
                 const handOverPanel = document.getElementById('handOverPanel');
+                const publicHolidaysPanel = document.getElementById('publicHolidaysPanel');
                 const summaryPanel = document.getElementById('summaryPanel');
                 const calendarContainer = document.getElementById('calendar-container');
                 
                 // Hide all panels first
                 handOverPanel.classList.add('hidden');
+                publicHolidaysPanel.classList.add('hidden');
                 summaryPanel.classList.add('hidden');
                 calendarContainer.classList.add('hidden');
                 
                 // Show the selected panel
                 if (viewName === 'handover') {
                     handOverPanel.classList.remove('hidden');
+                } else if (viewName === 'publicholidays') {
+                    publicHolidaysPanel.classList.remove('hidden');
                 } else if (viewName === 'summary') {
                     summaryPanel.classList.remove('hidden');
                     this.renderSummary(); // Ensure summary is rendered when shown
@@ -525,6 +585,14 @@
                 });
             }
 
+            formatDate(date) {
+                return new Date(date).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
             formatCalendarDay(date) {
                 const options = { weekday: 'short', day: '2-digit', month: '2-digit' };
                 return new Intl.DateTimeFormat('en-AU', options).format(date);
@@ -563,6 +631,44 @@
                 }
             }
 
+            addHoliday() {
+                const dateInput = document.getElementById('holidayDateInput');
+                const labelInput = document.getElementById('holidayLabelInput');
+                const newDate = dateInput.value;
+                const newLabel = labelInput.value.trim();
+                
+                if (!newDate) {
+                    this.showError('Please select a date');
+                    return;
+                }
+                if (!newLabel) {
+                    this.showError('Please enter a holiday name');
+                    return;
+                }
+                if (this.state.publicHolidays.some(h => h.day === newDate)) {
+                    this.showError('A holiday already exists on this date');
+                    return;
+                }
+                
+                this.state.publicHolidays.push({ day: newDate, label: newLabel });
+                this.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
+                dateInput.value = '';
+                labelInput.value = '';
+                this.updateHolidayDisplay();
+                this.render();
+                this.showSuccess('Holiday added successfully');
+            }
+
+            removeHoliday(day) {
+                const index = this.state.publicHolidays.findIndex(h => h.day === day);
+                if (index !== -1) {
+                    this.state.publicHolidays.splice(index, 1);
+                    this.updateHolidayDisplay();
+                    this.render();
+                    this.showSuccess('Holiday removed successfully');
+                }
+            }
+
             updateHandoverDisplay() {
                 const container = document.getElementById('handoverList');
                 container.innerHTML = '';
@@ -574,6 +680,22 @@
                     item.innerHTML = `
                         <span>${this.formatDateTime(handover)}</span>
                         <button type="button" class="btn btn-danger" onclick="app.removeHandover('${handover}')">-</button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            updateHolidayDisplay() {
+                const container = document.getElementById('holidayList');
+                container.innerHTML = '';
+                // Sort holidays for display (reverse chronological order)
+                const sortedHolidays = [...this.state.publicHolidays].sort((a, b) => new Date(b.day) - new Date(a.day));
+                sortedHolidays.forEach(holiday => {
+                    const item = document.createElement('div');
+                    item.className = 'holiday-item';
+                    item.innerHTML = `
+                        <span>${this.formatDate(holiday.day)} - ${holiday.label}</span>
+                        <button type="button" class="btn btn-danger" onclick="app.removeHoliday('${holiday.day}')">-</button>
                     `;
                     container.appendChild(item);
                 });
@@ -739,6 +861,7 @@
         }
         // Global functions for event handlers
         window.addHandover = () => app.addHandover();
+        window.addHoliday = () => app.addHoliday();
         window.restoreDefaults = () => app.restoreDefaults();
         // Initialize the application
         const app = new CarePlannerApp();
