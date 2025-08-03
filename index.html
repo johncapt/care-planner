@@ -66,25 +66,6 @@
             margin-bottom: 1rem;
         }
 
-        .date-range-info {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 4px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .date-range-info h3 {
-            color: #1976d2;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .date-range-info p {
-            margin: 0.25rem 0;
-            color: #424242;
-        }
-
         label {
             font-weight: 600;
             margin-bottom: 0.25rem;
@@ -103,13 +84,6 @@
             outline: none;
             border-color: #007bff;
             box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
-        }
-
-        .fieldset {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
         }
 
         .fieldset-legend {
@@ -167,14 +141,6 @@
 
         .btn-secondary:hover {
             background: #5a6268;
-        }
-
-        .handover-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 0.5rem;
         }
 
         .handover-item {
@@ -468,17 +434,8 @@
             <h1>Care Planner 2024-2025</h1>
             <button id="toggleButton" class="toggle-btn">Settings</button>
         </div>
-
         <div id="errorContainer"></div>
-
         <div id="settingsPanel" class="settings-panel hidden">
-            <div id="dateRangeInfo" class="date-range-info">
-                <h3>Calculated Date Range</h3>
-                <p><strong>Start:</strong> <span id="calculatedStart">-</span></p>
-                <p><strong>End:</strong> <span id="calculatedEnd">-</span></p>
-                <p><em>These dates are automatically calculated from your handover times</em></p>
-            </div>
-
             <div class="form-group">
                 <label for="startsWith">Care Period Starts With</label>
                 <select id="startsWith" name="startsWith">
@@ -487,21 +444,18 @@
                 </select>
             </div>
 
-            <div class="fieldset">
+            <div>
                 <div class="fieldset-legend">Handover Times</div>
                 <div class="handover-input">
                     <input type="datetime-local" id="handoverInput" placeholder="Select handover time">
                     <button type="button" class="btn btn-primary" onclick="addHandover()">Add</button>
                 </div>
-                <div id="handoverList" class="handover-list"></div>
+                <div id="handoverList"></div>
             </div>
-
             <button type="button" class="btn btn-secondary" onclick="restoreDefaults()">Restore Defaults</button>
         </div>
-
         <div id="mainContent">
             <div id="summaryContainer" class="summary-container"></div>
-
             <div class="calendar-container">
                 <h2>Calendar View</h2>
                 <div class="legend">
@@ -522,7 +476,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Application state management
         class CarePlannerApp {
@@ -545,6 +498,8 @@
                     ]
                 };
                 this.currentDate = new Date();
+                this.calculatedStart = null;
+                this.calculatedEnd = null;
                 this.isSettingsVisible = false;
                 this.init();
             }
@@ -566,7 +521,6 @@
             loadDefaults() {
                 document.getElementById('startsWith').value = this.state.startsWith;
                 this.updateHandoverDisplay();
-                this.updateDateRangeDisplay();
             }
 
             updateState(key, value) {
@@ -578,12 +532,15 @@
                 this.isSettingsVisible = !this.isSettingsVisible;
                 const panel = document.getElementById('settingsPanel');
                 const button = document.getElementById('toggleButton');
+                const mainContent = document.getElementById('mainContent');
                 
                 if (this.isSettingsVisible) {
                     panel.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
                     button.textContent = 'Back';
                 } else {
                     panel.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
                     button.textContent = 'Settings';
                 }
             }
@@ -616,20 +573,6 @@
                     startDate: sortedHandovers[0],
                     endDate: sortedHandovers[sortedHandovers.length - 1]
                 };
-            }
-
-            updateDateRangeDisplay() {
-                const { startDate, endDate } = this.calculateDateRange();
-                const startElement = document.getElementById('calculatedStart');
-                const endElement = document.getElementById('calculatedEnd');
-
-                if (startDate && endDate) {
-                    startElement.textContent = this.formatDateTime(startDate);
-                    endElement.textContent = this.formatDateTime(endDate);
-                } else {
-                    startElement.textContent = 'Add at least 2 handovers';
-                    endElement.textContent = 'Add at least 2 handovers';
-                }
             }
 
             validateHandovers() {
@@ -703,7 +646,6 @@
                 this.state.handovers.sort((a, b) => new Date(a) - new Date(b));
                 input.value = '';
                 this.updateHandoverDisplay();
-                this.updateDateRangeDisplay();
                 this.render();
                 this.showSuccess('Handover added successfully');
             }
@@ -718,7 +660,6 @@
                 if (index !== -1) {
                     this.state.handovers.splice(index, 1);
                     this.updateHandoverDisplay();
-                    this.updateDateRangeDisplay();
                     this.render();
                     this.showSuccess('Handover removed successfully');
                 }
