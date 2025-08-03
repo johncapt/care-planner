@@ -26,11 +26,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .nav-button {
             background: #007bff;
@@ -41,6 +36,9 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.2s;
+        }
+        .nav-button.active {
+            background: #0056b3;
         }
         .navigation-panel {
             background: white;
@@ -122,8 +120,12 @@
         .summary-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: .5rem;
             margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .summary-card-h2 {
             color: #333;
@@ -294,11 +296,18 @@
         }
         .flex-container {
             display: flex;
-            flex-flow: row wrap;
+            gap: 0.5rem;
+            max-width: 400px;
         }
         .flex-container > div {
             width: 120px;
             text-align: center;
+        }
+        #calendar-container {
+            background: white;
+            padding: .5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -308,8 +317,9 @@
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
                 <div><button id="handOverButton" class="nav-button">Hand Overs</button></div>
+                <div><button id="publicHolidaysButton" class="nav-button">Public Holidays</button></div>
                 <div><button id="summaryButton" class="nav-button">Summary</button></div>
-                <div><button id="calendarButton" class="nav-button">Calendar</button></div>
+                <div><button id="calendarButton" class="nav-button active">Calendar</button></div>
             </div>
         </div>
         <div id="errorContainer"></div>
@@ -334,7 +344,6 @@
         <div id="mainContent">
             <div id="summaryPanel" class="summary-container hidden"></div>
             <div id="calendar-container">
-                <h2>Calendar View</h2>
                 <div class="legend">
                     <div class="legend-item">
                         <div class="legend-color mum-period"></div>
@@ -367,7 +376,7 @@
                         '2025-08-09T10:00',
                         '2025-08-10T09:00'
                     ],
-                    specialDays: [
+                    publicHolidays: [
                         { day: '2024-12-25', label: "Christmas Day" },
                         { day: '2024-12-26', label: "Boxing Day" },
                         { day: '2025-01-01', label: "New Year's Day" },
@@ -409,6 +418,8 @@
 
             toggleView(viewName) {
                 if (this.currentView === viewName) return;
+                
+                // Update button states
                 const buttons = document.querySelectorAll('.nav-button');
                 buttons.forEach(button => {
                     button.classList.remove('active');
@@ -418,18 +429,25 @@
                 });
 
                 this.currentView = viewName;
+                
+                // Get all panels
                 const handOverPanel = document.getElementById('handOverPanel');
                 const summaryPanel = document.getElementById('summaryPanel');
-                const mainContent = document.getElementById('mainContent');
+                const calendarContainer = document.getElementById('calendar-container');
+                
+                // Hide all panels first
+                handOverPanel.classList.add('hidden');
+                summaryPanel.classList.add('hidden');
+                calendarContainer.classList.add('hidden');
+                
+                // Show the selected panel
                 if (viewName === 'handover') {
-                    handOverPanel.classList.toggle('hidden');
-                    mainContent.classList.add('hidden');
+                    handOverPanel.classList.remove('hidden');
                 } else if (viewName === 'summary') {
-                    handOverPanel.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
+                    summaryPanel.classList.remove('hidden');
+                    this.renderSummary(); // Ensure summary is rendered when shown
                 } else if (viewName === 'calendar') {
-                    handOverPanel.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
+                    calendarContainer.classList.remove('hidden');
                     this.renderCalendar();
                 }
             }
@@ -548,8 +566,8 @@
             updateHandoverDisplay() {
                 const container = document.getElementById('handoverList');
                 container.innerHTML = '';
-                // Sort handovers for display
-                const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
+                // Sort handovers for display (reverse chronological order)
+                const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(b) - new Date(a));
                 sortedHandovers.forEach(handover => {
                     const item = document.createElement('div');
                     item.className = 'handover-item';
@@ -675,7 +693,7 @@
                         }
                         // Check for holidays
                         const dateStr = currentDate.toISOString().split('T')[0];
-                        const holiday = this.state.specialDays.find(h => h.day === dateStr);
+                        const holiday = this.state.publicHolidays.find(h => h.day === dateStr);
                         if (holiday) {
                             cell.classList.add('public-holiday-cell');
                             cell.title = holiday.label;
@@ -689,8 +707,11 @@
             }
             render() {
                 requestAnimationFrame(() => {
-                    this.renderSummary();
-                    this.renderCalendar();
+                    if (this.currentView === 'summary') {
+                        this.renderSummary();
+                    } else if (this.currentView === 'calendar') {
+                        this.renderCalendar();
+                    }
                 });
             }
             restoreDefaults() {
@@ -704,7 +725,7 @@
                         '2025-08-09T10:00',
                         '2025-08-10T09:00'
                     ],
-                    specialDays: [
+                    publicHolidays: [
                         { day: '2024-12-25', label: "Christmas Day" },
                         { day: '2024-12-26', label: "Boxing Day" },
                         { day: '2025-01-01', label: "New Year's Day" },
