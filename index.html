@@ -422,13 +422,16 @@
                         '2025-08-03T18:00',
                         '2025-08-06T19:00',
                         '2025-08-09T10:00',
-                        '2025-08-10T09:00'
+                        '2025-08-25T09:00',
+                        '2025-08-30T09:00',
                     ],
                     publicHolidays: [
-                        { day: '2024-12-25', label: "Christmas Day" },
-                        { day: '2024-12-26', label: "Boxing Day" },
-                        { day: '2025-01-01', label: "New Year's Day" },
-                        { day: '2025-01-26', label: "Australia Day" }
+                        { day: '2025-08-20', label: "Mum B'Day" },
+                        { day: '2025-08-29', label: "Dad B'Day" },
+                        { day: '2025-12-25', label: "Christmas Day" },
+                        { day: '2025-12-26', label: "Boxing Day" },
+                        { day: '2026-01-01', label: "New Year's Day" },
+                        { day: '2026-01-26', label: "Australia Day" }
                     ]
                 };
                 this.currentDate = new Date();
@@ -839,21 +842,9 @@
             }
             restoreDefaults() {
                 this.state = {
-                    startsWith: 'Mum',
-                    handovers: [
-                        '2025-07-28T15:00',
-                        '2025-07-31T15:00',
-                        '2025-08-03T18:00',
-                        '2025-08-06T19:00',
-                        '2025-08-09T10:00',
-                        '2025-08-10T09:00'
-                    ],
-                    publicHolidays: [
-                        { day: '2024-12-25', label: "Christmas Day" },
-                        { day: '2024-12-26', label: "Boxing Day" },
-                        { day: '2025-01-01', label: "New Year's Day" },
-                        { day: '2025-01-26', label: "Australia Day" }
-                    ]
+                    startsWith: this.state.startsWith,
+                    handovers: this.state.handovers,
+                    publicHolidays: this.state.publicHolidays
                 };
                 this.loadDefaults();
                 this.render();

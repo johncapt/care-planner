@@ -1,6 +1,8 @@
+const CACHE_NAME = 'care-planner-cache-v1'; // Increment version when updating
+
 self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open('care-planner-cache').then(function (cache) {
+    caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll([
         './',
         './index.html',
@@ -11,10 +13,31 @@ self.addEventListener('install', function (event) {
   );
 });
 
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames.map(function (cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
 self.addEventListener('fetch', function (event) {
   event.respondWith(
     caches.match(event.request).then(function (response) {
-      return response || fetch(event.request);
+      // Return cached version or fetch from network
+      return response || fetch(event.request).then(function(fetchResponse) {
+        // Optionally cache new responses
+        return caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, fetchResponse.clone());
+          return fetchResponse;
+        });
+      });
     })
   );
 });
