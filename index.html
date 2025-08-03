@@ -37,7 +37,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .toggle-btn {
+        .nav-button {
             background: #007bff;
             color: white;
             border: none;
@@ -46,10 +46,6 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.2s;
-        }
-
-        .toggle-btn:hover {
-            background: #0056b3;
         }
 
         .settings-panel {
@@ -90,7 +86,6 @@
             font-weight: 600;
             font-size: 1.1rem;
             color: #333;
-            margin-bottom: 1rem;
         }
 
         .handover-input {
@@ -117,10 +112,6 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
         .btn-danger {
             background: #dc3545;
             color: white;
@@ -128,19 +119,11 @@
             font-size: 0.875rem;
         }
 
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
             width: 100%;
             margin-top: 1rem;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
         }
 
         .handover-item {
@@ -164,17 +147,10 @@
             margin-bottom: 2rem;
         }
 
-        .summary-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .summary-card h2 {
+        .summary-card-h2 {
             color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
         }
 
         .summary-table {
@@ -203,13 +179,6 @@
         .balanced-totals {
             background: #d4edda !important;
             color: #155724;
-        }
-
-        .calendar-container {
-            background: white;
-            border-radius: 8px;
-            padding: 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .month-section {
@@ -379,10 +348,6 @@
                 padding: 0.5rem;
             }
 
-            .calendar-container {
-                padding: 0.5rem;
-            }
-
             .calendar-day {
                 margin-bottom: 1px;
             }
@@ -401,15 +366,6 @@
                 padding: 0.15rem 0;
             }
 
-            .summary-card {
-                padding: 0.75rem;
-            }
-
-            .summary-card h2 {
-                font-size: 1.2rem;
-                margin-bottom: 0.5rem;
-            }
-
             .summary-table th,
             .summary-table td {
                 padding: 0.3rem;
@@ -425,6 +381,15 @@
             opacity: 0.6;
             pointer-events: none;
         }
+        .flex-container {
+        display: flex;
+        flex-flow: row wrap;
+        }
+
+        .flex-container > div {
+        width: 130px;
+        text-align: center;
+        }
     </style>
 </head>
 
@@ -432,7 +397,11 @@
     <div class="container">
         <div class="header">
             <h1>Care Planner 2024-2025</h1>
-            <button id="toggleButton" class="toggle-btn">Settings</button>
+            <div class="flex-container">
+                <div><button id="handOverTimesButton" class="nav-button">Hand Overs</button></div>
+                <div><button id="" class="nav-button">Table view</button></div>
+                <div><button id="" class="nav-button">Calendar view</button></div>
+            </div>
         </div>
         <div id="errorContainer"></div>
         <div id="settingsPanel" class="settings-panel hidden">
@@ -456,7 +425,7 @@
         </div>
         <div id="mainContent">
             <div id="summaryContainer" class="summary-container"></div>
-            <div class="calendar-container">
+            <div id="calendar-container">
                 <h2>Calendar View</h2>
                 <div class="legend">
                     <div class="legend-item">
@@ -511,7 +480,7 @@
             }
 
             bindEvents() {
-                document.getElementById('toggleButton').addEventListener('click', () => this.toggleSettings());
+                document.getElementById('handOverTimesButton').addEventListener('click', () => this.toggleSettings());
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
@@ -531,7 +500,7 @@
             toggleSettings() {
                 this.isSettingsVisible = !this.isSettingsVisible;
                 const panel = document.getElementById('settingsPanel');
-                const button = document.getElementById('toggleButton');
+                const button = document.getElementById('handOverTimesButton');
                 const mainContent = document.getElementById('mainContent');
                 
                 if (this.isSettingsVisible) {
@@ -707,8 +676,6 @@
 
                 Object.entries(summary).forEach(([parent, data]) => {
                     const card = document.createElement('div');
-                    card.className = 'summary-card';
-                    
                     const isPast = (date) => new Date(date) < this.currentDate;
                     
                     const tableRows = data.periods.map(period => {
