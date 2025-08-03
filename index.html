@@ -307,13 +307,13 @@
         <div class="header">
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
-                <div><button id="HandOverButton" class="nav-button">Hand Overs</button></div>
-                <div><button id="SummaryButton" class="nav-button">Summary</button></div>
-                <div><button id="" class="nav-button">Calendar</button></div>
+                <div><button id="handOverButton" class="nav-button">Hand Overs</button></div>
+                <div><button id="summaryButton" class="nav-button">Summary</button></div>
+                <div><button id="calendarButton" class="nav-button">Calendar</button></div>
             </div>
         </div>
         <div id="errorContainer"></div>
-        <div id="HandOverPanel" class="navigation-panel hidden">
+        <div id="handOverPanel" class="navigation-panel hidden">
             <div class="form-group">
                 <label for="startsWith">Care Period Starts With</label>
                 <select id="startsWith" name="startsWith">
@@ -332,7 +332,7 @@
             <button type="button" class="btn btn-secondary" onclick="restoreDefaults()">Restore Defaults</button>
         </div>
         <div id="mainContent">
-            <div id="summaryContainer" class="summary-container hidden"></div>
+            <div id="summaryPanel" class="summary-container hidden"></div>
             <div id="calendar-container">
                 <h2>Calendar View</h2>
                 <div class="legend">
@@ -375,6 +375,7 @@
                     ]
                 };
                 this.currentDate = new Date();
+                this.currentView = 'calendar';
                 this.calculatedStart = null;
                 this.calculatedEnd = null;
                 this.init();
@@ -387,8 +388,9 @@
             }
 
             bindEvents() {
-                document.getElementById('HandOverButton').addEventListener('click', () => this.toggleView('handover'));
-                document.getElementById('SummaryButton').addEventListener('click', () => this.toggleView('summary'));
+                document.getElementById('handOverButton').addEventListener('click', () => this.toggleView('handover'));
+                document.getElementById('summaryButton').addEventListener('click', () => this.toggleView('summary'));
+                document.getElementById('calendarButton').addEventListener('click', () => this.toggleView('calendar'));
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
@@ -406,16 +408,29 @@
             }
 
             toggleView(viewName) {
-                const handOverPanel = document.getElementById('HandOverPanel');
-                const button = document.getElementById('HandOverButton');
+                if (this.currentView === viewName) return;
+                const buttons = document.querySelectorAll('.nav-button');
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.id === `${viewName}Button`) {
+                        button.classList.add('active');
+                    }
+                });
+
+                this.currentView = viewName;
+                const handOverPanel = document.getElementById('handOverPanel');
+                const summaryPanel = document.getElementById('summaryPanel');
                 const mainContent = document.getElementById('mainContent');
-                
                 if (viewName === 'handover') {
                     handOverPanel.classList.toggle('hidden');
                     mainContent.classList.add('hidden');
                 } else if (viewName === 'summary') {
                     handOverPanel.classList.add('hidden');
                     mainContent.classList.remove('hidden');
+                } else if (viewName === 'calendar') {
+                    handOverPanel.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    this.renderCalendar();
                 }
             }
 
@@ -562,8 +577,8 @@
                     });
                     summary[period.with].total += duration;
                 });
-                const container = document.getElementById('summaryContainer');
-                container.innerHTML = '';
+                const summaryPanel = document.getElementById('summaryPanel');
+                summaryPanel.innerHTML = '';
                 Object.entries(summary).forEach(([parent, data]) => {
                     const card = document.createElement('div');
                     const isPast = (date) => new Date(date) < this.currentDate;
@@ -598,7 +613,7 @@
                             </tbody>
                         </table>
                     `;
-                    container.appendChild(card);
+                    summaryPanel.appendChild(card);
                 });
             }
 
