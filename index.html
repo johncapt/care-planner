@@ -818,7 +818,10 @@
                             }
                         }
                         // Check for holidays
-                        const dateStr = currentDate.toISOString().split('T')[0];
+                        const year = currentDate.getFullYear();
+                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(currentDate.getDate()).padStart(2, '0');
+                        const dateStr = `${year}-${month}-${day}`;
                         const holiday = this.state.publicHolidays.find(h => h.day === dateStr);
                         if (holiday) {
                             cell.classList.add('public-holiday-cell');
