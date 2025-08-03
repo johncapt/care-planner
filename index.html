@@ -208,15 +208,13 @@
         }
 
         .day-number {
-            background: #f8f9fa;
-            padding: 0.25rem 0.5rem;
+            
             font-weight: 600;
             color: #333;
             text-align: center;
             border-radius: 3px;
             font-size: 0.8rem;
-            min-width: 32px;
-            border: 1px solid #e9ecef;
+            
         }
 
         .day-timeline {
@@ -237,34 +235,6 @@
 
         .hour-cell:last-child {
             border-right: none;
-        }
-
-        .hour-labels {
-            display: grid;
-            grid-template-columns: auto repeat(24, 1fr);
-            gap: 0.5rem;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            margin-bottom: 0.25rem;
-            padding: 0.25rem;
-            align-items: center;
-        }
-
-        .hour-labels-spacer {
-            min-width: 32px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #999;
-            font-weight: 500;
-        }
-
-        .hour-label {
-            background: transparent;
-            text-align: center;
-            font-size: 0.6rem;
-            color: #666;
-            font-weight: 500;
         }
 
         .mum-period {
@@ -361,11 +331,6 @@
                 height: 20px;
             }
 
-            .hour-label {
-                font-size: 0.6rem;
-                padding: 0.15rem 0;
-            }
-
             .summary-table th,
             .summary-table td {
                 padding: 0.3rem;
@@ -387,7 +352,7 @@
         }
 
         .flex-container > div {
-        width: 130px;
+        width: 120px;
         text-align: center;
         }
     </style>
@@ -399,8 +364,8 @@
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
                 <div><button id="handOverTimesButton" class="nav-button">Hand Overs</button></div>
-                <div><button id="" class="nav-button">Table view</button></div>
-                <div><button id="" class="nav-button">Calendar view</button></div>
+                <div><button id="" class="nav-button">Summary</button></div>
+                <div><button id="" class="nav-button">Calendar</button></div>
             </div>
         </div>
         <div id="errorContainer"></div>
@@ -724,24 +689,6 @@
 
                 const container = document.getElementById('calendarContainer');
                 container.innerHTML = '';
-
-                // Create hour labels (only once at the top)
-                const hourLabelsDiv = document.createElement('div');
-                hourLabelsDiv.className = 'hour-labels';
-                
-                // Spacer for day number column
-                const spacer = document.createElement('div');
-                spacer.className = 'hour-labels-spacer';
-                spacer.textContent = 'Hr';
-                hourLabelsDiv.appendChild(spacer);
-                
-                for (let hour = 0; hour < 24; hour++) {
-                    const hourLabel = document.createElement('div');
-                    hourLabel.className = 'hour-label';
-                    hourLabel.textContent = hour.toString().padStart(2, '0');
-                    hourLabelsDiv.appendChild(hourLabel);
-                }
-                container.appendChild(hourLabelsDiv);
 
                 // Group days by month
                 const start = new Date(startDate);
