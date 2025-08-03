@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -12,20 +11,17 @@
             margin: 0;
             padding: 0;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.4;
             color: #333;
             background: #f8f9fa;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 1rem;
         }
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -36,7 +32,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         .nav-button {
             background: #007bff;
             color: white;
@@ -47,7 +42,6 @@
             font-weight: 600;
             transition: background-color 0.2s;
         }
-
         .navigation-panel {
             background: white;
             border-radius: 8px;
@@ -55,19 +49,16 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
         }
-
         .form-group {
             display: flex;
             flex-direction: column;
             margin-bottom: 1rem;
         }
-
         label {
             font-weight: 600;
             margin-bottom: 0.25rem;
             color: #555;
         }
-
         input, select, textarea {
             padding: 0.5rem;
             border: 2px solid #e9ecef;
@@ -75,29 +66,24 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
-
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #007bff;
             box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
         }
-
         .fieldset-legend {
             font-weight: 600;
             font-size: 1.1rem;
             color: #333;
         }
-
         .handover-input {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
-
         .handover-input input {
             flex: 1;
         }
-
         .btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -106,25 +92,21 @@
             font-weight: 600;
             transition: all 0.2s;
         }
-
         .btn-primary {
             background: #007bff;
             color: white;
         }
-
         .btn-danger {
             background: #dc3545;
             color: white;
             font-size: 1rem;
         }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
             width: 100%;
             margin-top: 1rem;
         }
-
         .handover-item {
             display: flex;
             justify-content: space-between;
@@ -134,60 +116,49 @@
             background: #f8f9fa;
             border-radius: 4px;
         }
-
         .handover-item:last-child {
             margin-bottom: 0;
         }
-
         .summary-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-bottom: 2rem;
         }
-
         .summary-card-h2 {
             color: #333;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
         }
-
         .summary-table {
             width: 100%;
             border-collapse: collapse;
         }
-
         .summary-table th,
         .summary-table td {
             padding: 0.5rem;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
         }
-
         .summary-table th {
             background: #f8f9fa;
             font-weight: 600;
             color: #555;
         }
-
         .total-row {
             font-weight: 600;
             background: #f8f9fa;
         }
-
         .balanced-totals {
             background: #d4edda !important;
             color: #155724;
         }
-
         .month-section {
             margin-bottom: 1rem;
         }
-
         .month-section:last-child {
             margin-bottom: 0;
         }
-
         .month-header {
             color: #333;
             background: white;
@@ -196,7 +167,6 @@
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
-
         .calendar-day {
             display: grid;
             grid-template-columns: auto 1fr;
@@ -205,7 +175,6 @@
             margin-bottom: 1px;
             padding: 1px;
         }
-
         .day-number {
             font-weight: 600;
             color: #333;
@@ -214,7 +183,6 @@
             font-size: 0.8rem;
             min-width: 14px;  
         }
-
         .day-timeline {
             display: grid;
             grid-template-columns: repeat(24, 1fr);
@@ -222,7 +190,6 @@
             background: #fff;
             flex: 1;
         }
-
         .hour-cell {
             height: 20px;
             background: #fff;
@@ -230,48 +197,39 @@
             position: relative;
             border-right: 1px solid #f0f0f0;
         }
-
         .hour-cell:last-child {
             border-right: none;
         }
-
         .mum-period {
             background: #dc3545;
         }
-
         .dad-period {
             background: #28a745;
         }
-
-        .holiday-cell {
+        .public-holiday-cell {
             background: #ffc107 !important;
             position: relative;
         }
-
         .past-period {
             opacity: 0.6;
             filter: grayscale(0.3);
         }
-
         .legend {
             display: flex;
             gap: 0.75rem;
             margin-bottom: 0.75rem;
             flex-wrap: wrap;
         }
-
         .legend-item {
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
-
         .legend-color {
             width: 16px;
             height: 12px;
             border-radius: 2px;
         }
-
         .error-message {
             background: #f8d7da;
             color: #721c24;
@@ -280,7 +238,6 @@
             margin-bottom: 1rem;
             border: 1px solid #f5c6cb;
         }
-
         .success-message {
             background: #d4edda;
             color: #155724;
@@ -289,7 +246,6 @@
             margin-bottom: 1rem;
             border: 1px solid #c3e6cb;
         }
-
         .warning-message {
             background: #fff3cd;
             color: #856404;
@@ -337,24 +293,22 @@
             pointer-events: none;
         }
         .flex-container {
-        display: flex;
-        flex-flow: row wrap;
+            display: flex;
+            flex-flow: row wrap;
         }
-
         .flex-container > div {
-        width: 120px;
-        text-align: center;
+            width: 120px;
+            text-align: center;
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
                 <div><button id="HandOverButton" class="nav-button">Hand Overs</button></div>
-                <div><button id="" class="nav-button">Summary</button></div>
+                <div><button id="SummaryButton" class="nav-button">Summary</button></div>
                 <div><button id="" class="nav-button">Calendar</button></div>
             </div>
         </div>
@@ -391,8 +345,8 @@
                         <span>Dad</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color holiday-cell"></div>
-                        <span>Holiday</span>
+                        <div class="legend-color public-holiday-cell"></div>
+                        <span>Public Holiday</span>
                     </div>
                 </div>
                 <div id="calendarContainer"></div>
@@ -423,7 +377,6 @@
                 this.currentDate = new Date();
                 this.calculatedStart = null;
                 this.calculatedEnd = null;
-                this.isSettingsVisible = false;
                 this.init();
             }
 
@@ -434,7 +387,8 @@
             }
 
             bindEvents() {
-                document.getElementById('HandOverButton').addEventListener('click', () => this.toggleSettings());
+                document.getElementById('HandOverButton').addEventListener('click', () => this.toggleView('handover'));
+                document.getElementById('SummaryButton').addEventListener('click', () => this.toggleView('summary'));
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
@@ -451,20 +405,17 @@
                 this.render();
             }
 
-            toggleSettings() {
-                this.isSettingsVisible = !this.isSettingsVisible;
+            toggleView(viewName) {
                 const handOverPanel = document.getElementById('HandOverPanel');
                 const button = document.getElementById('HandOverButton');
                 const mainContent = document.getElementById('mainContent');
                 
-                if (this.isSettingsVisible) {
-                    handOverPanel.classList.remove('hidden');
+                if (viewName === 'handover') {
+                    handOverPanel.classList.toggle('hidden');
                     mainContent.classList.add('hidden');
-                    button.textContent = 'Back';
-                } else {
+                } else if (viewName === 'summary') {
                     handOverPanel.classList.add('hidden');
                     mainContent.classList.remove('hidden');
-                    button.textContent = 'Settings';
                 }
             }
 
@@ -490,7 +441,6 @@
                 if (this.state.handovers.length < 2) {
                     return { startDate: null, endDate: null };
                 }
-
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
                 return {
                     startDate: sortedHandovers[0],
@@ -508,14 +458,11 @@
 
             buildCarePeriods() {
                 if (!this.validateHandovers()) return [];
-
                 const { startDate, endDate } = this.calculateDateRange();
                 const periods = [];
                 let currentParent = this.state.startsWith;
-
                 // Sort handovers chronologically
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
-
                 // Create periods between consecutive handovers
                 for (let i = 0; i < sortedHandovers.length - 1; i++) {
                     periods.push({
@@ -525,7 +472,6 @@
                     });
                     currentParent = currentParent === 'Mum' ? 'Dad' : 'Mum';
                 }
-
                 return periods;
             }
 
@@ -554,17 +500,14 @@
             addHandover() {
                 const input = document.getElementById('handoverInput');
                 const newHandover = input.value;
-
                 if (!newHandover) {
                     this.showError('Please select a handover time');
                     return;
                 }
-
                 if (this.state.handovers.includes(newHandover)) {
                     this.showError('This handover time already exists');
                     return;
                 }
-
                 this.state.handovers.push(newHandover);
                 this.state.handovers.sort((a, b) => new Date(a) - new Date(b));
                 input.value = '';
@@ -578,7 +521,6 @@
                     this.showWarning('You need at least 2 handover times for a care schedule');
                     return;
                 }
-
                 const index = this.state.handovers.indexOf(handover);
                 if (index !== -1) {
                     this.state.handovers.splice(index, 1);
@@ -591,10 +533,8 @@
             updateHandoverDisplay() {
                 const container = document.getElementById('handoverList');
                 container.innerHTML = '';
-
                 // Sort handovers for display
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
-
                 sortedHandovers.forEach(handover => {
                     const item = document.createElement('div');
                     item.className = 'handover-item';
@@ -609,9 +549,7 @@
             renderSummary() {
                 const periods = this.buildCarePeriods();
                 if (periods.length === 0) return;
-
                 const summary = {};
-                
                 periods.forEach(period => {
                     const duration = new Date(period.to) - new Date(period.from);
                     if (!summary[period.with]) {
@@ -624,10 +562,8 @@
                     });
                     summary[period.with].total += duration;
                 });
-
                 const container = document.getElementById('summaryContainer');
                 container.innerHTML = '';
-
                 Object.entries(summary).forEach(([parent, data]) => {
                     const card = document.createElement('div');
                     const isPast = (date) => new Date(date) < this.currentDate;
@@ -642,9 +578,7 @@
                             </tr>
                         `;
                     }).join('');
-
                     const totalClass = Object.values(summary).every(s => s.total === data.total) ? 'total-row balanced-totals' : 'total-row';
-
                     card.innerHTML = `
                         <h2>${parent}</h2>
                         <table class="summary-table">
@@ -664,7 +598,6 @@
                             </tbody>
                         </table>
                     `;
-                    
                     container.appendChild(card);
                 });
             }
@@ -672,24 +605,18 @@
             renderCalendar() {
                 const periods = this.buildCarePeriods();
                 if (periods.length === 0) return;
-
                 const { startDate, endDate } = this.calculateDateRange();
                 if (!startDate || !endDate) return;
-
                 const container = document.getElementById('calendarContainer');
                 container.innerHTML = '';
-
                 // Group days by month
                 const start = new Date(startDate);
                 const end = new Date(endDate);
                 let currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-                
                 let currentMonth = null;
                 let monthSection = null;
-
                 while (currentDate <= end) {
                     const monthYear = currentDate.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
-                    
                     // Create new month section if needed
                     if (currentMonth !== monthYear) {
                         currentMonth = monthYear;
@@ -704,65 +631,53 @@
                         
                         container.appendChild(monthSection);
                     }
-
                     // Create day container
                     const dayDiv = document.createElement('div');
                     dayDiv.className = 'calendar-day';
-                    
                     // Day number
                     const dayNumber = document.createElement('div');
                     dayNumber.className = 'day-number';
                     dayNumber.textContent = currentDate.getDate();
                     dayDiv.appendChild(dayNumber);
-
                     // Timeline for this day
                     const timeline = document.createElement('div');
                     timeline.className = 'day-timeline';
-
                     // Hour cells
                     for (let hour = 0; hour < 24; hour++) {
                         const cell = document.createElement('div');
                         cell.className = 'hour-cell';
-                        
                         const cellDateTime = new Date(currentDate);
                         cellDateTime.setHours(hour);
-
                         // Find matching period
                         const period = periods.find(p => 
                             cellDateTime >= new Date(p.from) && cellDateTime < new Date(p.to)
                         );
-
                         if (period) {
                             cell.classList.add(period.with === 'Mum' ? 'mum-period' : 'dad-period');
                             if (cellDateTime < this.currentDate) {
                                 cell.classList.add('past-period');
                             }
                         }
-
                         // Check for holidays
                         const dateStr = currentDate.toISOString().split('T')[0];
                         const holiday = this.state.specialDays.find(h => h.day === dateStr);
                         if (holiday) {
-                            cell.classList.add('holiday-cell');
+                            cell.classList.add('public-holiday-cell');
                             cell.title = holiday.label;
                         }
-
                         timeline.appendChild(cell);
                     }
-
                     dayDiv.appendChild(timeline);
                     monthSection.appendChild(dayDiv);
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             }
-
             render() {
                 requestAnimationFrame(() => {
                     this.renderSummary();
                     this.renderCalendar();
                 });
             }
-
             restoreDefaults() {
                 this.state = {
                     startsWith: 'Mum',
@@ -786,14 +701,11 @@
                 this.showSuccess('Defaults restored successfully');
             }
         }
-
         // Global functions for event handlers
         window.addHandover = () => app.addHandover();
         window.restoreDefaults = () => app.restoreDefaults();
-
         // Initialize the application
         const app = new CarePlannerApp();
     </script>
 </body>
-
 </html>
