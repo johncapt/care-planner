@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Care Planner 2024-2025</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#008080" />
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <style>
         * {
             box-sizing: border-box;
@@ -346,10 +353,10 @@
         <div class="header">
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
+                <div><button id="calendarButton" class="nav-button active">Calendar</button></div>
+                <div><button id="summaryButton" class="nav-button">Summary</button></div>
                 <div><button id="handOverButton" class="nav-button">Hand Overs</button></div>
                 <div><button id="publicHolidaysButton" class="nav-button">Public Holidays</button></div>
-                <div><button id="summaryButton" class="nav-button">Summary</button></div>
-                <div><button id="calendarButton" class="nav-button active">Calendar</button></div>
             </div>
         </div>
         <div id="errorContainer"></div>
@@ -446,12 +453,6 @@
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
                 });
-                // document.getElementById('holidayDateInput').addEventListener('keypress', (e) => {
-                //     if (e.key === 'Enter') this.addHoliday();
-                // });
-                // document.getElementById('holidayLabelInput').addEventListener('keypress', (e) => {
-                //     if (e.key === 'Enter') this.addHoliday();
-                // });
             }
 
             loadDefaults() {
@@ -865,6 +866,14 @@
         window.restoreDefaults = () => app.restoreDefaults();
         // Initialize the application
         const app = new CarePlannerApp();
+        // register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered:', reg))
+                .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
     </script>
 </body>
 </html>
