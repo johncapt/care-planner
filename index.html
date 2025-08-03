@@ -48,7 +48,7 @@
             transition: background-color 0.2s;
         }
 
-        .settings-panel {
+        .navigation-panel {
             background: white;
             border-radius: 8px;
             padding: 1.5rem;
@@ -115,8 +115,7 @@
         .btn-danger {
             background: #dc3545;
             color: white;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
+            font-size: 1rem;
         }
 
         .btn-secondary {
@@ -130,7 +129,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem;
+            padding: 0.1rem;
             margin-bottom: 0.25rem;
             background: #f8f9fa;
             border-radius: 4px;
@@ -208,13 +207,12 @@
         }
 
         .day-number {
-            
             font-weight: 600;
             color: #333;
             text-align: center;
             border-radius: 3px;
             font-size: 0.8rem;
-            
+            min-width: 14px;  
         }
 
         .day-timeline {
@@ -307,41 +305,33 @@
                 gap: 0.5rem;
                 margin-bottom: 1rem;
             }
-
             .header {
                 flex-direction: column;
                 gap: 0.75rem;
                 padding: 0.75rem;
             }
-
             .container {
                 padding: 0.5rem;
             }
-
             .calendar-day {
                 margin-bottom: 1px;
             }
-
             .day-header {
                 padding: 0.3rem 0.5rem;
                 font-size: 0.8rem;
             }
-
             .hour-cell {
                 height: 20px;
             }
-
             .summary-table th,
             .summary-table td {
                 padding: 0.3rem;
                 font-size: 0.8rem;
             }
         }
-
         .hidden {
             display: none;
         }
-
         .loading {
             opacity: 0.6;
             pointer-events: none;
@@ -363,13 +353,13 @@
         <div class="header">
             <h1>Care Planner 2024-2025</h1>
             <div class="flex-container">
-                <div><button id="handOverTimesButton" class="nav-button">Hand Overs</button></div>
+                <div><button id="HandOverButton" class="nav-button">Hand Overs</button></div>
                 <div><button id="" class="nav-button">Summary</button></div>
                 <div><button id="" class="nav-button">Calendar</button></div>
             </div>
         </div>
         <div id="errorContainer"></div>
-        <div id="settingsPanel" class="settings-panel hidden">
+        <div id="HandOverPanel" class="navigation-panel hidden">
             <div class="form-group">
                 <label for="startsWith">Care Period Starts With</label>
                 <select id="startsWith" name="startsWith">
@@ -377,19 +367,18 @@
                     <option value="Dad">Dad</option>
                 </select>
             </div>
-
             <div>
                 <div class="fieldset-legend">Handover Times</div>
                 <div class="handover-input">
                     <input type="datetime-local" id="handoverInput" placeholder="Select handover time">
-                    <button type="button" class="btn btn-primary" onclick="addHandover()">Add</button>
+                    <button type="button" class="btn btn-primary" onclick="addHandover()">+</button>
                 </div>
                 <div id="handoverList"></div>
             </div>
             <button type="button" class="btn btn-secondary" onclick="restoreDefaults()">Restore Defaults</button>
         </div>
         <div id="mainContent">
-            <div id="summaryContainer" class="summary-container"></div>
+            <div id="summaryContainer" class="summary-container hidden"></div>
             <div id="calendar-container">
                 <h2>Calendar View</h2>
                 <div class="legend">
@@ -445,7 +434,7 @@
             }
 
             bindEvents() {
-                document.getElementById('handOverTimesButton').addEventListener('click', () => this.toggleSettings());
+                document.getElementById('HandOverButton').addEventListener('click', () => this.toggleSettings());
                 document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
@@ -464,16 +453,16 @@
 
             toggleSettings() {
                 this.isSettingsVisible = !this.isSettingsVisible;
-                const panel = document.getElementById('settingsPanel');
-                const button = document.getElementById('handOverTimesButton');
+                const handOverPanel = document.getElementById('HandOverPanel');
+                const button = document.getElementById('HandOverButton');
                 const mainContent = document.getElementById('mainContent');
                 
                 if (this.isSettingsVisible) {
-                    panel.classList.remove('hidden');
+                    handOverPanel.classList.remove('hidden');
                     mainContent.classList.add('hidden');
                     button.textContent = 'Back';
                 } else {
-                    panel.classList.add('hidden');
+                    handOverPanel.classList.add('hidden');
                     mainContent.classList.remove('hidden');
                     button.textContent = 'Settings';
                 }
@@ -611,7 +600,7 @@
                     item.className = 'handover-item';
                     item.innerHTML = `
                         <span>${this.formatDateTime(handover)}</span>
-                        <button type="button" class="btn btn-danger" onclick="app.removeHandover('${handover}')">Remove</button>
+                        <button type="button" class="btn btn-danger" onclick="app.removeHandover('${handover}')">-</button>
                     `;
                     container.appendChild(item);
                 });
