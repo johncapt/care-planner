@@ -1,4 +1,4 @@
-const CACHE_NAME = 'care-planner-cache-v2'; // Increment version when updating
+const CACHE_NAME = 'care-planner-cache-v5'; // Increment version when updating
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
