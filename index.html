@@ -386,6 +386,19 @@
                     <input type="text" id="holidayLabelInput" placeholder="Holiday name">
                     <button type="button" class="btn btn-primary" onclick="addHoliday()">+</button>
                 </div>
+                <div class="form-group">
+                    <label for="juridiction">State</label>
+                    <select id="juridiction" onchange="fetchPublicHolidays()">
+                        <option value="act">Australian Capital Territory</option>
+                        <option value="nsw">New South Wales</option>
+                        <option value="nt">Northern Territory</option>
+                        <option value="qld">Queensland</option>
+                        <option value="sa">South Australia</option>
+                        <option value="tas">Tasmania</option>
+                        <option value="vic">Victoria</option>
+                        <option value="wa" selected>Western Australia</option>
+                    </select>
+                </div>
                 <div id="holidayList"></div>
             </div>
         </div>
@@ -425,14 +438,7 @@
                         '2025-08-25T09:00',
                         '2025-08-30T09:00',
                     ],
-                    publicHolidays: [
-                        { day: '2025-08-20', label: "Mum B'Day" },
-                        { day: '2025-08-29', label: "Dad B'Day" },
-                        { day: '2025-12-25', label: "Christmas Day" },
-                        { day: '2025-12-26', label: "Boxing Day" },
-                        { day: '2026-01-01', label: "New Year's Day" },
-                        { day: '2026-01-26', label: "Australia Day" }
-                    ]
+                    publicHolidays: []
                 };
                 this.currentDate = new Date();
                 this.currentView = 'calendar';
@@ -868,6 +874,41 @@
                 .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
+
+        const formatDate = (dateString) => {
+            // Ensure dateString is in YYYYMMDD format
+            if (!/^\d{8}$/.test(dateString)) {
+                console.error('Invalid date format:', dateString);
+                return dateString; // Return as is if format is invalid
+            }
+            return dateString.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+        }
+
+        const fetchPublicHolidays = async () => {
+            // https://data.gov.au/data/dataset/australian-holidays-machine-readable-dataset/resource/4d4d744b-50ed-45b9-ae77-760bc478ad75
+            const resp = await fetch('https://data.gov.au/data/api/action/datastore_search_sql?sql=SELECT%20*%20from%20%224d4d744b-50ed-45b9-ae77-760bc478ad75%22');
+            const jurisdiction = document.getElementById('juridiction').value;
+            console.log('Fetching public holidays for jurisdiction:', jurisdiction);
+            const data = await resp.json();
+            const specialDays = data.result.records
+            .filter(rec => rec["Jurisdiction"]==jurisdiction)
+            .map(rec => ({
+                day: formatDate(rec["Date"]),
+                label: rec["Holiday Name"]
+            }));
+            app.state.publicHolidays = specialDays;
+            app.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
+            app.updateHolidayDisplay();
+            app.render();
+            // save to localStorage
+            localStorage.setItem('publicHolidays', JSON.stringify(app.state.publicHolidays));
+        };
+
+        // Fetch public holidays on load
+        fetchPublicHolidays().catch(err => {
+            console.error('Failed to fetch public holidays:', err);
+            app.showError('Failed to load public holidays');
+        });
     </script>
 </body>
 </html>
