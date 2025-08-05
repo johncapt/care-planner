@@ -625,6 +625,8 @@
                 this.updateHandoverDisplay();
                 this.render();
                 this.showSuccess('Handover added successfully');
+                // save to localStorage
+                localStorage.setItem('handovers', JSON.stringify(this.state.handovers));
             }
 
             removeHandover(handover) {
@@ -638,6 +640,8 @@
                     this.updateHandoverDisplay();
                     this.render();
                     this.showSuccess('Handover removed successfully');
+                    // save to localStorage
+                    localStorage.setItem('handovers', JSON.stringify(this.state.handovers));
                 }
             }
 
@@ -667,6 +671,8 @@
                 this.updateHolidayDisplay();
                 this.render();
                 this.showSuccess('Holiday added successfully');
+                // save to localStorage
+                localStorage.setItem('publicHolidays', JSON.stringify(this.state.publicHolidays));
             }
 
             removeHoliday(day) {
@@ -676,6 +682,8 @@
                     this.updateHolidayDisplay();
                     this.render();
                     this.showSuccess('Holiday removed successfully');
+                    // save to localStorage
+                    localStorage.setItem('publicHolidays', JSON.stringify(this.state.publicHolidays));
                 }
             }
 
