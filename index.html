@@ -921,6 +921,8 @@
         const storedPublicHolidays = localStorage.getItem('publicHolidays');
         if (storedPublicHolidays) {
             app.state.publicHolidays = JSON.parse(storedPublicHolidays);
+            app.updateHolidayDisplay();
+            app.render();
         } else {
             // If no public holidays in local storage, fetch them
             console.log('No public holidays found in local storage, fetching from API...');
