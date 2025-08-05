@@ -912,11 +912,23 @@
             localStorage.setItem('publicHolidays', JSON.stringify(app.state.publicHolidays));
         };
 
-        // Fetch public holidays on load
-        fetchPublicHolidays().catch(err => {
-            console.error('Failed to fetch public holidays:', err);
-            app.showError('Failed to load public holidays');
-        });
+        // check local storage, then fetch public holidays on load
+        const storedHandovers = localStorage.getItem('handovers');
+        if (storedHandovers) {
+            app.state.handovers = JSON.parse(storedHandovers);
+        }
+
+        const storedPublicHolidays = localStorage.getItem('publicHolidays');
+        if (storedPublicHolidays) {
+            app.state.publicHolidays = JSON.parse(storedPublicHolidays);
+        } else {
+            // If no public holidays in local storage, fetch them
+            console.log('No public holidays found in local storage, fetching from API...');
+            fetchPublicHolidays().catch(err => {
+                console.error('Failed to fetch public holidays:', err);
+                app.showError('Failed to load public holidays');
+            });
+        }
     </script>
 </body>
 </html>
