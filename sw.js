@@ -1,43 +1,78 @@
-const CACHE_NAME = 'care-planner-cache-v7'; // Increment version when updating
+// Increment this version number every time you deploy
+const CACHE_VERSION = 'v1.0.1';
+const CACHE_NAME = `care-planner-${CACHE_VERSION}`;
 
-self.addEventListener('install', function (event) {
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/manifest.json',
+  '/icon-192.png',
+  '/favicon.ico'
+];
+
+// Install event - cache resources
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll([
-        './',
-        './index.html',
-        './icon-192.png',
-        './icon-512.png'
-      ]);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache:', CACHE_NAME);
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => self.skipWaiting()) // Force immediate activation
   );
 });
 
-self.addEventListener('activate', function (event) {
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(function (cacheNames) {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(function (cacheName) {
+        cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Take control immediately
   );
 });
 
-self.addEventListener('fetch', function (event) {
+// Fetch event - serve from cache, fallback to network
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      // Return cached version or fetch from network
-      return response || fetch(event.request).then(function(fetchResponse) {
-        // Optionally cache new responses
-        return caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
+    caches.match(event.request)
+      .then((response) => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        // Clone the request
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest).then((response) => {
+          // Check if valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+          
+          // Clone the response
+          const responseToCache = response.clone();
+          
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+          
+          return response;
         });
-      });
-    })
+      })
   );
+});
+
+// Listen for skip waiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

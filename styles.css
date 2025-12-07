@@ -19,6 +19,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Header */
 .header {
   background: #008080;
   color: white;
@@ -26,15 +27,38 @@ body {
   border-radius: 8px 8px 0 0;
 }
 
-.header h1 {
-  margin-bottom: 15px;
+.header-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.header-title h1 {
+  margin: 0;
   font-size: 24px;
+}
+
+.nav-toggle {
+  font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
 .flex-container {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: 15px;
+  overflow: hidden;
+  max-height: 500px;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
+
+.flex-container.hidden {
+  max-height: 0;
+  margin-top: 0;
+  opacity: 0;
 }
 
 .nav-button {
@@ -58,6 +82,7 @@ body {
   border-color: white;
 }
 
+/* Messages */
 #errorContainer {
   padding: 0 20px;
 }
@@ -89,6 +114,7 @@ body {
   border-left: 4px solid #ffc107;
 }
 
+/* Panels */
 .navigation-panel {
   padding: 20px;
 }
@@ -97,6 +123,7 @@ body {
   display: none !important;
 }
 
+/* Forms */
 .form-group {
   margin-bottom: 20px;
 }
@@ -138,6 +165,7 @@ input[type="text"] {
   flex: 1;
 }
 
+/* Buttons */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -178,6 +206,7 @@ input[type="text"] {
   background: #c82333;
 }
 
+/* Lists */
 .handover-item,
 .holiday-item {
   display: flex;
@@ -189,10 +218,12 @@ input[type="text"] {
   margin-bottom: 8px;
 }
 
+/* Main Content */
 #mainContent {
   padding: 20px;
 }
 
+/* Legend */
 .legend {
   display: flex;
   gap: 20px;
@@ -227,6 +258,49 @@ input[type="text"] {
   background: #ffd43b;
 }
 
+/* Calendar */
+.month-section {
+  margin-bottom: 15px;
+}
+
+.month-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: #008080;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 3px solid #008080;
+}
+
+.calendar-day {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 1px;
+  padding: 2px 4px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.day-number {
+  font-weight: 700;
+  font-size: 12px;
+  min-width: 25px;
+  padding-top: 0;
+}
+
+.day-timeline {
+  display: flex;
+  flex: 1;
+  gap: 1px;
+  height: 18px;
+}
+
+.hour-cell {
+  flex: 1;
+  background: #e9ecef;
+  border-radius: 2px;
+}
+
 .hour-cell.mum-period {
   background: #c4b5fd;
 }
@@ -239,52 +313,11 @@ input[type="text"] {
   background: #ffd43b;
 }
 
-.month-section {
-  margin-bottom: 30px;
-}
-
-.month-header {
-  font-size: 20px;
-  font-weight: 700;
-  color: #008080;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 3px solid #008080;
-}
-
-.calendar-day {
-  display: flex;
-  gap: 5px; /* reduced from 10px */
-  margin-bottom: 2px; /* reduced from 10px */
-  padding: 4px; /* reduced from 8px */
-  background: #f8f9fa;
-  border-radius: 5px;
-}
-
-.day-number {
-  font-weight: 700;
-  font-size: 12px; /* reduced from 14px */
-  min-width: 25px; /* reduced from 30px */
-  padding-top: 0; /* removed padding */
-}
-
-.day-timeline {
-  display: flex;
-  flex: 1;
-  gap: 1px;
-  height: 20px; /* reduced from 24px */
-}
-
-.hour-cell {
-  flex: 1;
-  background: #e9ecef;
-  border-radius: 2px;
-}
-
 .past-period {
   opacity: 0.5;
 }
 
+/* Summary */
 .summary-container {
   display: grid;
   gap: 20px;
@@ -317,6 +350,7 @@ input[type="text"] {
   background: #d4edda;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .flex-container {
     flex-direction: column;
