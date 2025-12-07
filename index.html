@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Care Planner</title>
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#008080" />
-    <!-- iOS Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="icon-192.png" />
@@ -93,30 +91,57 @@
         // Application state management
         class CarePlannerApp {
             constructor() {
-                this.state = {
+                // Default state - stored separately for restore functionality
+                this.defaultState = {
                     startsWith: 'Mum',
                     handovers: [
-                        '2025-07-28T15:00',
-                        '2025-07-31T15:00',
-                        '2025-08-03T18:00',
-                        '2025-08-06T19:00',
-                        '2025-08-09T10:00',
-                        '2025-08-25T09:00',
-                        '2025-08-30T09:00',
+                        '2025-12-19T15:00',
+                        '2026-01-10T10:00',
+                        '2026-01-24T18:00'
                     ],
                     publicHolidays: []
                 };
+                
+                // Deep clone default state
+                this.state = JSON.parse(JSON.stringify(this.defaultState));
                 this.currentDate = new Date();
                 this.currentView = 'calendar';
-                this.calculatedStart = null;
-                this.calculatedEnd = null;
                 this.init();
             }
 
             init() {
+                this.loadFromLocalStorage();
                 this.bindEvents();
                 this.loadDefaults();
                 this.render();
+            }
+
+            loadFromLocalStorage() {
+                // Load startsWith
+                const storedStartsWith = localStorage.getItem('startsWith');
+                if (storedStartsWith) {
+                    this.state.startsWith = storedStartsWith;
+                }
+                
+                // Load handovers
+                const storedHandovers = localStorage.getItem('handovers');
+                if (storedHandovers) {
+                    try {
+                        this.state.handovers = JSON.parse(storedHandovers);
+                    } catch (e) {
+                        console.error('Failed to parse handovers from localStorage:', e);
+                    }
+                }
+                
+                // Load public holidays
+                const storedPublicHolidays = localStorage.getItem('publicHolidays');
+                if (storedPublicHolidays) {
+                    try {
+                        this.state.publicHolidays = JSON.parse(storedPublicHolidays);
+                    } catch (e) {
+                        console.error('Failed to parse public holidays from localStorage:', e);
+                    }
+                }
             }
 
             bindEvents() {
@@ -124,7 +149,10 @@
                 document.getElementById('publicHolidaysButton').addEventListener('click', () => this.toggleView('publicholidays'));
                 document.getElementById('summaryButton').addEventListener('click', () => this.toggleView('summary'));
                 document.getElementById('calendarButton').addEventListener('click', () => this.toggleView('calendar'));
-                document.getElementById('startsWith').addEventListener('change', (e) => this.updateState('startsWith', e.target.value));
+                document.getElementById('startsWith').addEventListener('change', (e) => {
+                    this.updateState('startsWith', e.target.value);
+                    localStorage.setItem('startsWith', e.target.value);
+                });
                 document.getElementById('handoverInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.addHandover();
                 });
@@ -146,64 +174,61 @@
                 
                 // Update button states
                 const buttons = document.querySelectorAll('.nav-button');
-                buttons.forEach(button => {
-                    button.classList.remove('active');
-                });
+                buttons.forEach(button => button.classList.remove('active'));
                 
-                if (viewName === 'handover') {
-                    document.getElementById('handOverButton').classList.add('active');
-                } else if (viewName === 'publicholidays') {
-                    document.getElementById('publicHolidaysButton').classList.add('active');
-                } else if (viewName === 'summary') {
-                    document.getElementById('summaryButton').classList.add('active');
-                } else if (viewName === 'calendar') {
-                    document.getElementById('calendarButton').classList.add('active');
+                const buttonMap = {
+                    'handover': 'handOverButton',
+                    'publicholidays': 'publicHolidaysButton',
+                    'summary': 'summaryButton',
+                    'calendar': 'calendarButton'
+                };
+                
+                if (buttonMap[viewName]) {
+                    document.getElementById(buttonMap[viewName]).classList.add('active');
                 }
 
                 this.currentView = viewName;
                 
                 // Get all panels
-                const handOverPanel = document.getElementById('handOverPanel');
-                const publicHolidaysPanel = document.getElementById('publicHolidaysPanel');
-                const summaryPanel = document.getElementById('summaryPanel');
-                const calendarContainer = document.getElementById('calendar-container');
+                const panels = {
+                    handover: document.getElementById('handOverPanel'),
+                    publicholidays: document.getElementById('publicHolidaysPanel'),
+                    summary: document.getElementById('summaryPanel'),
+                    calendar: document.getElementById('calendar-container')
+                };
                 
-                // Hide all panels first
-                handOverPanel.classList.add('hidden');
-                publicHolidaysPanel.classList.add('hidden');
-                summaryPanel.classList.add('hidden');
-                calendarContainer.classList.add('hidden');
+                // Hide all panels
+                Object.values(panels).forEach(panel => panel.classList.add('hidden'));
                 
-                // Show the selected panel
-                if (viewName === 'handover') {
-                    handOverPanel.classList.remove('hidden');
-                } else if (viewName === 'publicholidays') {
-                    publicHolidaysPanel.classList.remove('hidden');
-                } else if (viewName === 'summary') {
-                    summaryPanel.classList.remove('hidden');
-                    this.renderSummary(); // Ensure summary is rendered when shown
-                } else if (viewName === 'calendar') {
-                    calendarContainer.classList.remove('hidden');
-                    this.renderCalendar();
+                // Show selected panel
+                if (panels[viewName]) {
+                    panels[viewName].classList.remove('hidden');
+                    
+                    // Render content for the view
+                    if (viewName === 'summary') {
+                        this.renderSummary();
+                    } else if (viewName === 'calendar') {
+                        this.renderCalendar();
+                    }
                 }
             }
 
             showError(message) {
-                const container = document.getElementById('errorContainer');
-                container.innerHTML = `<div class="error-message">${message}</div>`;
-                setTimeout(() => container.innerHTML = '', 5000);
+                this.showMessage(message, 'error-message', 5000);
             }
 
             showSuccess(message) {
-                const container = document.getElementById('errorContainer');
-                container.innerHTML = `<div class="success-message">${message}</div>`;
-                setTimeout(() => container.innerHTML = '', 3000);
+                this.showMessage(message, 'success-message', 3000);
             }
 
             showWarning(message) {
+                this.showMessage(message, 'warning-message', 4000);
+            }
+            
+            showMessage(message, className, duration) {
                 const container = document.getElementById('errorContainer');
-                container.innerHTML = `<div class="warning-message">${message}</div>`;
-                setTimeout(() => container.innerHTML = '', 4000);
+                container.innerHTML = `<div class="${className}">${message}</div>`;
+                setTimeout(() => container.innerHTML = '', duration);
             }
 
             calculateDateRange() {
@@ -227,20 +252,26 @@
 
             buildCarePeriods() {
                 if (!this.validateHandovers()) return [];
-                const { startDate, endDate } = this.calculateDateRange();
+                
                 const periods = [];
                 let currentParent = this.state.startsWith;
-                // Sort handovers chronologically
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(a) - new Date(b));
-                // Create periods between consecutive handovers
+                
                 for (let i = 0; i < sortedHandovers.length - 1; i++) {
+                    // Parse as local time by creating date from components
+                    const fromDate = new Date(sortedHandovers[i]);
+                    const toDate = new Date(sortedHandovers[i + 1]);
+                    
                     periods.push({
-                        from: sortedHandovers[i],
-                        to: sortedHandovers[i + 1],
+                        from: fromDate,
+                        to: toDate,
+                        fromStr: sortedHandovers[i],
+                        toStr: sortedHandovers[i + 1],
                         with: currentParent
                     });
                     currentParent = currentParent === 'Mum' ? 'Dad' : 'Mum';
                 }
+                
                 return periods;
             }
 
@@ -252,46 +283,53 @@
             }
 
             formatDateTime(date) {
-                return new Date(date).toLocaleString('en-US', {
+                return new Date(date).toLocaleString('en-AU', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
                     hour: 'numeric',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    hour12: true
                 });
             }
 
             formatDate(date) {
-                return new Date(date).toLocaleDateString('en-US', {
+                return new Date(date).toLocaleDateString('en-AU', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric'
                 });
             }
 
-            formatCalendarDay(date) {
-                const options = { weekday: 'short', day: '2-digit', month: '2-digit' };
-                return new Intl.DateTimeFormat('en-AU', options).format(date);
+            normalizeDate(date) {
+                const d = new Date(date);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
 
             addHandover() {
                 const input = document.getElementById('handoverInput');
                 const newHandover = input.value;
+                
                 if (!newHandover) {
                     this.showError('Please select a handover time');
                     return;
                 }
+                
                 if (this.state.handovers.includes(newHandover)) {
                     this.showError('This handover time already exists');
                     return;
                 }
+                
                 this.state.handovers.push(newHandover);
                 this.state.handovers.sort((a, b) => new Date(a) - new Date(b));
                 input.value = '';
+                
                 this.updateHandoverDisplay();
                 this.render();
                 this.showSuccess('Handover added successfully');
-                // save to localStorage
                 localStorage.setItem('handovers', JSON.stringify(this.state.handovers));
             }
 
@@ -300,13 +338,13 @@
                     this.showWarning('You need at least 2 handover times for a care schedule');
                     return;
                 }
+                
                 const index = this.state.handovers.indexOf(handover);
                 if (index !== -1) {
                     this.state.handovers.splice(index, 1);
                     this.updateHandoverDisplay();
                     this.render();
                     this.showSuccess('Handover removed successfully');
-                    // save to localStorage
                     localStorage.setItem('handovers', JSON.stringify(this.state.handovers));
                 }
             }
@@ -321,10 +359,12 @@
                     this.showError('Please select a date');
                     return;
                 }
+                
                 if (!newLabel) {
                     this.showError('Please enter a holiday name');
                     return;
                 }
+                
                 if (this.state.publicHolidays.some(h => h.day === newDate)) {
                     this.showError('A holiday already exists on this date');
                     return;
@@ -332,12 +372,13 @@
                 
                 this.state.publicHolidays.push({ day: newDate, label: newLabel });
                 this.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
+                
                 dateInput.value = '';
                 labelInput.value = '';
+                
                 this.updateHolidayDisplay();
                 this.render();
                 this.showSuccess('Holiday added successfully');
-                // save to localStorage
                 localStorage.setItem('publicHolidays', JSON.stringify(this.state.publicHolidays));
             }
 
@@ -348,7 +389,6 @@
                     this.updateHolidayDisplay();
                     this.render();
                     this.showSuccess('Holiday removed successfully');
-                    // save to localStorage
                     localStorage.setItem('publicHolidays', JSON.stringify(this.state.publicHolidays));
                 }
             }
@@ -356,8 +396,9 @@
             updateHandoverDisplay() {
                 const container = document.getElementById('handoverList');
                 container.innerHTML = '';
-                // Sort handovers for display (reverse chronological order)
+                
                 const sortedHandovers = [...this.state.handovers].sort((a, b) => new Date(b) - new Date(a));
+                
                 sortedHandovers.forEach(handover => {
                     const item = document.createElement('div');
                     item.className = 'handover-item';
@@ -372,14 +413,16 @@
             updateHolidayDisplay() {
                 const container = document.getElementById('holidayList');
                 container.innerHTML = '';
-                // Sort holidays for display (reverse chronological order)
+                
                 const sortedHolidays = [...this.state.publicHolidays].sort((a, b) => new Date(b.day) - new Date(a.day));
+                
                 sortedHolidays.forEach(holiday => {
                     const item = document.createElement('div');
                     item.className = 'holiday-item';
+                    const escapedDay = holiday.day.replace(/'/g, "\\'");
                     item.innerHTML = `
                         <span>${this.formatDate(holiday.day)} - ${holiday.label}</span>
-                        <button type="button" class="btn btn-danger" onclick="app.removeHoliday('${holiday.day}')">-</button>
+                        <button type="button" class="btn btn-danger" onclick="app.removeHoliday('${escapedDay}')">-</button>
                     `;
                     container.appendChild(item);
                 });
@@ -388,9 +431,11 @@
             renderSummary() {
                 const periods = this.buildCarePeriods();
                 if (periods.length === 0) return;
+                
                 const summary = {};
+                
                 periods.forEach(period => {
-                    const duration = new Date(period.to) - new Date(period.from);
+                    const duration = period.to - period.from;
                     if (!summary[period.with]) {
                         summary[period.with] = { periods: [], total: 0 };
                     }
@@ -401,11 +446,13 @@
                     });
                     summary[period.with].total += duration;
                 });
+                
                 const summaryPanel = document.getElementById('summaryPanel');
                 summaryPanel.innerHTML = '';
+                
                 Object.entries(summary).forEach(([parent, data]) => {
                     const card = document.createElement('div');
-                    const isPast = (date) => new Date(date) < this.currentDate;
+                    const isPast = (date) => date < this.currentDate;
                     
                     const tableRows = data.periods.map(period => {
                         const rowClass = isPast(period.to) ? 'past-period' : '';
@@ -417,7 +464,11 @@
                             </tr>
                         `;
                     }).join('');
-                    const totalClass = Object.values(summary).every(s => s.total === data.total) ? 'total-row balanced-totals' : 'total-row';
+                    
+                    const totals = Object.values(summary).map(s => s.total);
+                    const allEqual = totals.every(t => t === totals[0]);
+                    const totalClass = allEqual ? 'total-row balanced-totals' : 'total-row';
+                    
                     card.innerHTML = `
                         <h2>${parent}</h2>
                         <table class="summary-table">
@@ -444,19 +495,22 @@
             renderCalendar() {
                 const periods = this.buildCarePeriods();
                 if (periods.length === 0) return;
+                
                 const { startDate, endDate } = this.calculateDateRange();
                 if (!startDate || !endDate) return;
+                
                 const container = document.getElementById('calendarContainer');
                 container.innerHTML = '';
-                // Group days by month
+                
                 const start = new Date(startDate);
                 const end = new Date(endDate);
                 let currentDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
                 let currentMonth = null;
                 let monthSection = null;
+                
                 while (currentDate <= end) {
                     const monthYear = currentDate.toLocaleString('en-AU', { month: 'long', year: 'numeric' });
-                    // Create new month section if needed
+                    
                     if (currentMonth !== monthYear) {
                         currentMonth = monthYear;
                         
@@ -470,50 +524,87 @@
                         
                         container.appendChild(monthSection);
                     }
-                    // Create day container
+                    
                     const dayDiv = document.createElement('div');
                     dayDiv.className = 'calendar-day';
-                    // Day number
+                    
                     const dayNumber = document.createElement('div');
                     dayNumber.className = 'day-number';
                     dayNumber.textContent = currentDate.getDate();
                     dayDiv.appendChild(dayNumber);
-                    // Timeline for this day
+                    
                     const timeline = document.createElement('div');
                     timeline.className = 'day-timeline';
-                    // Hour cells
+                    
+                    const dateStr = this.normalizeDate(currentDate);
+                    const holiday = this.state.publicHolidays.find(h => h.day === dateStr);
+                    
                     for (let hour = 0; hour < 24; hour++) {
                         const cell = document.createElement('div');
                         cell.className = 'hour-cell';
-                        const cellDateTime = new Date(currentDate);
-                        cellDateTime.setHours(hour);
-                        // Find matching period
-                        const period = periods.find(p => 
-                            cellDateTime >= new Date(p.from) && cellDateTime < new Date(p.to)
-                        );
+                        
+                        const cellTime = new Date(currentDate);
+                        cellTime.setHours(hour, 0, 0, 0);
+                        
+                        // Debug first day, first few hours
+                        if (currentDate.getDate() === 19 && currentDate.getMonth() === 11 && hour < 3) {
+                            console.log(`Hour ${hour}:`, {
+                                cellTime: cellTime,
+                                cellTimestamp: cellTime.getTime(),
+                                periodsCount: periods.length,
+                                period0From: periods[0]?.from,
+                                period0To: periods[0]?.to,
+                                period0FromTS: periods[0]?.from.getTime(),
+                                period0ToTS: periods[0]?.to.getTime()
+                            });
+                        }
+                        
+                        // Find period that contains this hour
+                        const period = periods.find(p => {
+                            const cellTimestamp = cellTime.getTime();
+                            const fromTimestamp = p.from.getTime();
+                            const toTimestamp = p.to.getTime();
+                            const match = cellTimestamp >= fromTimestamp && cellTimestamp < toTimestamp;
+                            
+                            if (currentDate.getDate() === 19 && currentDate.getMonth() === 11 && hour === 15) {
+                                console.log(`Hour 15 (3pm) check:`, {
+                                    cellTimestamp,
+                                    fromTimestamp,
+                                    toTimestamp,
+                                    match,
+                                    periodWith: p.with
+                                });
+                            }
+                            
+                            return match;
+                        });
+                        
                         if (period) {
-                            cell.classList.add(period.with === 'Mum' ? 'mum-period' : 'dad-period');
-                            if (cellDateTime < this.currentDate) {
+                            const className = period.with === 'Mum' ? 'mum-period' : 'dad-period';
+                            cell.classList.add(className);
+                            if (cellTime < this.currentDate) {
                                 cell.classList.add('past-period');
                             }
+                            if (currentDate.getDate() === 19 && hour === 15) {
+                                console.log('Added class:', className, 'to cell, classes:', cell.className);
+                            }
                         }
-                        // Check for holidays
-                        const year = currentDate.getFullYear();
-                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(currentDate.getDate()).padStart(2, '0');
-                        const dateStr = `${year}-${month}-${day}`;
-                        const holiday = this.state.publicHolidays.find(h => h.day === dateStr);
+                        
                         if (holiday) {
                             cell.classList.add('public-holiday-cell');
                             cell.title = holiday.label;
                         }
+                        
                         timeline.appendChild(cell);
                     }
+                    
                     dayDiv.appendChild(timeline);
                     monthSection.appendChild(dayDiv);
+                    
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             }
+            
             render() {
                 requestAnimationFrame(() => {
                     if (this.currentView === 'summary') {
@@ -523,79 +614,94 @@
                     }
                 });
             }
+            
             restoreDefaults() {
-                this.state = {
-                    startsWith: this.state.startsWith,
-                    handovers: this.state.handovers,
-                    publicHolidays: this.state.publicHolidays
-                };
-                this.loadDefaults();
+                // Properly restore to default state
+                this.state = JSON.parse(JSON.stringify(this.defaultState));
+                
+                // Update UI
+                document.getElementById('startsWith').value = this.state.startsWith;
+                this.updateHandoverDisplay();
+                this.updateHolidayDisplay();
+                
+                // Save to localStorage
+                localStorage.setItem('startsWith', this.state.startsWith);
+                localStorage.setItem('handovers', JSON.stringify(this.state.handovers));
+                localStorage.setItem('publicHolidays', JSON.stringify(this.state.publicHolidays));
+                
                 this.render();
                 this.showSuccess('Defaults restored successfully');
             }
         }
+        
         // Global functions for event handlers
         window.addHandover = () => app.addHandover();
         window.addHoliday = () => app.addHoliday();
         window.restoreDefaults = () => app.restoreDefaults();
-        // Initialize the application
-        const app = new CarePlannerApp();
-        // register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker registered:', reg))
-                .catch(err => console.error('Service Worker registration failed:', err));
-            });
-        }
-
+        
+        // Format date from YYYYMMDD to YYYY-MM-DD
         const formatDate = (dateString) => {
-            // Ensure dateString is in YYYYMMDD format
             if (!/^\d{8}$/.test(dateString)) {
                 console.error('Invalid date format:', dateString);
-                return dateString; // Return as is if format is invalid
+                return dateString;
             }
             return dateString.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
         }
-
+        
+        // Fetch public holidays from API
         const fetchPublicHolidays = async () => {
-            // https://data.gov.au/data/dataset/australian-holidays-machine-readable-dataset/resource/4d4d744b-50ed-45b9-ae77-760bc478ad75
-            const resp = await fetch('https://data.gov.au/data/api/action/datastore_search_sql?sql=SELECT%20*%20from%20%224d4d744b-50ed-45b9-ae77-760bc478ad75%22');
             const jurisdiction = document.getElementById('juridiction').value;
             console.log('Fetching public holidays for jurisdiction:', jurisdiction);
-            const data = await resp.json();
-            const specialDays = data.result.records
-            .filter(rec => rec["Jurisdiction"]==jurisdiction)
-            .map(rec => ({
-                day: formatDate(rec["Date"]),
-                label: rec["Holiday Name"]
-            }));
-            app.state.publicHolidays = specialDays;
-            app.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
-            app.updateHolidayDisplay();
-            app.render();
-            // save to localStorage
-            localStorage.setItem('publicHolidays', JSON.stringify(app.state.publicHolidays));
-        };
-
-        // check local storage, then fetch public holidays on load
-        const storedHandovers = localStorage.getItem('handovers');
-        if (storedHandovers) {
-            app.state.handovers = JSON.parse(storedHandovers);
-        }
-
-        const storedPublicHolidays = localStorage.getItem('publicHolidays');
-        if (storedPublicHolidays) {
-            app.state.publicHolidays = JSON.parse(storedPublicHolidays);
-            app.updateHolidayDisplay();
-            app.render();
-        } else {
-            // If no public holidays in local storage, fetch them
-            console.log('No public holidays found in local storage, fetching from API...');
-            fetchPublicHolidays().catch(err => {
+            
+            try {
+                const resp = await fetch('https://data.gov.au/data/api/action/datastore_search_sql?sql=SELECT%20*%20from%20%224d4d744b-50ed-45b9-ae77-760bc478ad75%22');
+                
+                if (!resp.ok) {
+                    throw new Error(`HTTP error! status: ${resp.status}`);
+                }
+                
+                const data = await resp.json();
+                
+                if (!data.result || !data.result.records) {
+                    throw new Error('Invalid API response structure');
+                }
+                
+                const specialDays = data.result.records
+                    .filter(rec => rec["Jurisdiction"] === jurisdiction)
+                    .map(rec => ({
+                        day: formatDate(rec["Date"]),
+                        label: rec["Holiday Name"]
+                    }));
+                
+                app.state.publicHolidays = specialDays;
+                app.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
+                app.updateHolidayDisplay();
+                app.render();
+                
+                localStorage.setItem('publicHolidays', JSON.stringify(app.state.publicHolidays));
+                app.showSuccess(`Loaded ${specialDays.length} public holidays`);
+            } catch (err) {
                 console.error('Failed to fetch public holidays:', err);
-                app.showError('Failed to load public holidays');
+                app.showError('Failed to load public holidays. Please try again.');
+            }
+        };
+        
+        // Initialize the application
+        const app = new CarePlannerApp();
+        
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg))
+                    .catch(err => console.error('Service Worker registration failed:', err));
             });
+        }
+        
+        // Auto-fetch public holidays if none in storage
+        if (app.state.publicHolidays.length === 0) {
+            console.log('No public holidays found in local storage, fetching from API...');
+            fetchPublicHolidays();
         }
     </script>
 </body>
