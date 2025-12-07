@@ -666,12 +666,38 @@
                     throw new Error('Invalid API response structure');
                 }
                 
+                const currentYear = new Date().getFullYear();
+                const nextYear = currentYear + 1;
+                
+                // Get holidays for current and next year from API
                 const specialDays = data.result.records
-                    .filter(rec => rec["Jurisdiction"] === jurisdiction)
+                    .filter(rec => {
+                        if (rec["Jurisdiction"] !== jurisdiction) return false;
+                        const dateStr = rec["Date"];
+                        const year = parseInt(dateStr.substring(0, 4));
+                        return year === currentYear || year === nextYear;
+                    })
                     .map(rec => ({
                         day: formatDate(rec["Date"]),
                         label: rec["Holiday Name"]
                     }));
+                
+                // Check if we have next year's data
+                const hasNextYear = specialDays.some(h => h.day.startsWith(nextYear.toString()));
+                
+                // If next year's data is missing, duplicate current year's holidays
+                if (!hasNextYear) {
+                    const currentYearHolidays = specialDays.filter(h => h.day.startsWith(currentYear.toString()));
+                    const duplicatedHolidays = currentYearHolidays.map(holiday => {
+                        const [year, month, day] = holiday.day.split('-');
+                        return {
+                            day: `${nextYear}-${month}-${day}`,
+                            label: holiday.label
+                        };
+                    });
+                    specialDays.push(...duplicatedHolidays);
+                    console.log(`API only has ${currentYear} data. Duplicated ${duplicatedHolidays.length} holidays for ${nextYear}`);
+                }
                 
                 app.state.publicHolidays = specialDays;
                 app.state.publicHolidays.sort((a, b) => new Date(a.day) - new Date(b.day));
