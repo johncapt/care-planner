@@ -1,3 +1,18 @@
+const mumPicker = document.getElementById("mumColorPicker");
+const dadPicker = document.getElementById("dadColorPicker");
+
+// Load saved colors
+function loadColors() {
+  const mumColor = localStorage.getItem("mumColor") || "#c4b5fd";
+  const dadColor = localStorage.getItem("dadColor") || "#6ee7b7";
+
+  document.documentElement.style.setProperty("--mum-color", mumColor);
+  document.documentElement.style.setProperty("--dad-color", dadColor);
+
+  if (mumPicker) mumPicker.value = mumColor;
+  if (dadPicker) dadPicker.value = dadColor;
+}
+
 // Application state management
 class CarePlannerApp {
   constructor() {
@@ -71,7 +86,25 @@ class CarePlannerApp {
       .getElementById("handoverInput")
       .addEventListener("keypress", (e) => {
         if (e.key === "Enter") this.addHandover();
-      });
+    });
+
+    // Color picker events
+    if (mumPicker) {
+    mumPicker.addEventListener("input", function () {
+        localStorage.setItem("mumColor", this.value);
+        document.documentElement.style.setProperty("--mum-color", this.value);
+    });
+    }
+
+    if (dadPicker) {
+    dadPicker.addEventListener("input", function () {
+        localStorage.setItem("dadColor", this.value);
+        document.documentElement.style.setProperty("--dad-color", this.value);
+    });
+    }
+
+    // Load colors immediately
+    loadColors();
   }
 
   loadDefaults() {
@@ -597,6 +630,8 @@ class CarePlannerApp {
     this.showSuccess("Defaults restored successfully");
   }
 }
+
+
 
 // Global functions for event handlers
 window.addHandover = () => app.addHandover();

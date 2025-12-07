@@ -1,3 +1,8 @@
+:root {
+  --mum-color: #c4b5fd;
+  --dad-color: #6ee7b7;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -146,13 +151,6 @@ input[type="text"] {
   font-size: 14px;
 }
 
-.fieldset-legend {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
 .handover-input,
 .holiday-input {
   display: flex;
@@ -224,19 +222,32 @@ input[type="text"] {
 }
 
 /* Legend */
+
+.fieldset-legend {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
 .legend {
   display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  align-items: center;
   gap: 20px;
   margin-bottom: 20px;
   padding: 15px;
   background: #f8f9fa;
   border-radius: 5px;
+  overflow-x: auto;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .legend-color {
@@ -246,16 +257,34 @@ input[type="text"] {
   border: 1px solid #ddd;
 }
 
-.legend-color.mum-period {
-  background: #c4b5fd;
+.legend-color.mum-period,
+.hour-cell.mum-period {
+  background: var(--mum-color);
 }
 
-.legend-color.dad-period {
-  background: #6ee7b7;
+.legend-color.dad-period,
+.hour-cell.dad-period {
+  background: var(--dad-color);
 }
 
-.legend-color.public-holiday-cell {
+.legend-color.public-holiday-cell,
+.hour-cell.public-holiday-cell {
   background: #ffd43b;
+}
+
+/* Color picker area */
+.legend-color-pickers {
+  margin-left: auto;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.legend-color-pickers label {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* Calendar */
@@ -302,11 +331,11 @@ input[type="text"] {
 }
 
 .hour-cell.mum-period {
-  background: #c4b5fd;
+  background: var(--mum-color);
 }
 
 .hour-cell.dad-period {
-  background: #6ee7b7;
+  background: var(--dad-color);
 }
 
 .hour-cell.public-holiday-cell {
@@ -352,16 +381,25 @@ input[type="text"] {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .flex-container {
+  /* .flex-container {
     flex-direction: column;
-  }
+  } */
 
   .nav-button {
     width: 100%;
   }
 
-  .legend {
-    flex-direction: column;
-    gap: 10px;
-  }
+}
+
+/* Force legend on a single line */
+.legend {
+  display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;       /* allows scroll on very small screens */
+  gap: 20px;
+}
+
+.legend-item {
+  flex-shrink: 0;
 }

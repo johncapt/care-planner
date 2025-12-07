@@ -1,96 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Care Planner</title>
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#008080" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="stylesheet" type="text/css" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <div class="header-title" onclick="toggleNavigation()">
-                <h1>Care Planner</h1>
-                <span id="navToggle" class="nav-toggle">▼</span>
-            </div>
-            <div id="navigationMenu" class="flex-container hidden">
-                <div><button id="calendarButton" class="nav-button active">Calendar</button></div>
-                <div><button id="summaryButton" class="nav-button">Summary</button></div>
-                <div><button id="handOverButton" class="nav-button">Hand Overs</button></div>
-                <div><button id="publicHolidaysButton" class="nav-button">Public Holidays</button></div>
-            </div>
+      <div class="header">
+        <div class="header-title" onclick="toggleNavigation()">
+          <h1>Care Planner</h1>
+          <span id="navToggle" class="nav-toggle">▼</span>
         </div>
-        <div id="errorContainer"></div>
-        <div id="handOverPanel" class="navigation-panel hidden">
-            <div class="form-group">
-                <label for="startsWith">Care Period Starts With</label>
-                <select id="startsWith" name="startsWith">
-                    <option value="Mum">Mum</option>
-                    <option value="Dad">Dad</option>
-                </select>
-            </div>
-            <div>
-                <div class="fieldset-legend">Handover Times</div>
-                <div class="handover-input">
-                    <input type="datetime-local" id="handoverInput" placeholder="Select handover time">
-                    <button type="button" class="btn btn-primary" onclick="addHandover()">+</button>
-                </div>
-                <div id="handoverList"></div>
-            </div>
-            <button type="button" class="btn btn-secondary" onclick="restoreDefaults()">Restore Defaults</button>
+        <div id="navigationMenu" class="flex-container hidden">
+          <div>
+            <button id="calendarButton" class="nav-button active">
+              Calendar
+            </button>
+          </div>
+          <div>
+            <button id="summaryButton" class="nav-button">Summary</button>
+          </div>
+          <div>
+            <button id="handOverButton" class="nav-button">Hand Overs</button>
+          </div>
+          <div>
+            <button id="publicHolidaysButton" class="nav-button">
+              Public Holidays
+            </button>
+          </div>
         </div>
-        <div id="publicHolidaysPanel" class="navigation-panel hidden">
-            <div>
-                <div class="fieldset-legend">Public Holidays</div>
-                <div class="holiday-input">
-                    <input type="date" id="holidayDateInput" placeholder="Select date">
-                    <input type="text" id="holidayLabelInput" placeholder="Holiday name">
-                    <button type="button" class="btn btn-primary" onclick="addHoliday()">+</button>
-                </div>
-                <div class="form-group">
-                    <label for="juridiction">State</label>
-                    <select id="juridiction" onchange="fetchPublicHolidays()">
-                        <option value="act">Australian Capital Territory</option>
-                        <option value="nsw">New South Wales</option>
-                        <option value="nt">Northern Territory</option>
-                        <option value="qld">Queensland</option>
-                        <option value="sa">South Australia</option>
-                        <option value="tas">Tasmania</option>
-                        <option value="vic">Victoria</option>
-                        <option value="wa" selected>Western Australia</option>
-                    </select>
-                </div>
-                <div id="holidayList"></div>
-            </div>
+      </div>
+      <div id="errorContainer"></div>
+      <div id="handOverPanel" class="navigation-panel hidden">
+        <div class="form-group">
+          <label for="startsWith">Care Period Starts With</label>
+          <select id="startsWith" name="startsWith">
+            <option value="Mum">Mum</option>
+            <option value="Dad">Dad</option>
+          </select>
         </div>
-        <div id="mainContent">
-            <div id="summaryPanel" class="summary-container hidden"></div>
-            <div id="calendar-container">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color mum-period"></div>
-                        <span>Mum</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color dad-period"></div>
-                        <span>Dad</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color public-holiday-cell"></div>
-                        <span>Public Holiday</span>
-                    </div>
-                </div>
-                <div id="calendarContainer"></div>
-            </div>
+        <div>
+          <div class="fieldset-legend">Handover Times</div>
+          <div class="handover-input">
+            <input
+              type="datetime-local"
+              id="handoverInput"
+              placeholder="Select handover time"
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="addHandover()"
+            >
+              +
+            </button>
+          </div>
+          <div id="handoverList"></div>
         </div>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="restoreDefaults()"
+        >
+          Restore Defaults
+        </button>
+      </div>
+      <div id="publicHolidaysPanel" class="navigation-panel hidden">
+        <div>
+          <div class="fieldset-legend">Public Holidays</div>
+          <div class="holiday-input">
+            <input
+              type="date"
+              id="holidayDateInput"
+              placeholder="Select date"
+            />
+            <input
+              type="text"
+              id="holidayLabelInput"
+              placeholder="Holiday name"
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="addHoliday()"
+            >
+              +
+            </button>
+          </div>
+          <div class="form-group">
+            <label for="juridiction">State</label>
+            <select id="juridiction" onchange="fetchPublicHolidays()">
+              <option value="act">Australian Capital Territory</option>
+              <option value="nsw">New South Wales</option>
+              <option value="nt">Northern Territory</option>
+              <option value="qld">Queensland</option>
+              <option value="sa">South Australia</option>
+              <option value="tas">Tasmania</option>
+              <option value="vic">Victoria</option>
+              <option value="wa" selected>Western Australia</option>
+            </select>
+          </div>
+          <div id="holidayList"></div>
+        </div>
+      </div>
+      <div id="mainContent">
+        <div id="summaryPanel" class="summary-container hidden"></div>
+        <div id="calendar-container">
+          <div class="legend">
+            <div class="legend-item">
+              <input
+                type="color"
+                id="mumColorPicker"
+                name="foregroundColorMum"
+                value="#c4b5fd"
+                style="width: 22px"
+              />
+              <span>Mum</span>
+            </div>
+            <div class="legend-item">
+              <input
+                type="color"
+                id="dadColorPicker"
+                name="foregroundColorDad"
+                value="#6ee7b7"
+                style="width: 22px"
+              />
+              <span>Dad</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color public-holiday-cell"></div>
+              <span>Public Holiday</span>
+            </div>
+          </div>
+          <div id="calendarContainer"></div>
+        </div>
+      </div>
     </div>
     <!-- Link to external JavaScript file -->
-    <script src="script.js"></script> 
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
