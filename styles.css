@@ -209,46 +209,34 @@ input[type="text"] {
 }
 
 .legend-color {
-    width: 30px;
-    height: 20px;
-    border-radius: 3px;
-    border: 1px solid #ddd;
+  width: 30px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
 }
 
 .legend-color.mum-period {
-    background: #ff6b9d;
+  background: #c4b5fd;
 }
 
 .legend-color.dad-period {
-    background: #4dabf7;
+  background: #6ee7b7;
 }
 
 .legend-color.public-holiday-cell {
-    background: repeating-linear-gradient(
-        45deg,
-        #ffd43b,
-        #ffd43b 5px,
-        #ffa94d 5px,
-        #ffa94d 10px
-    );
+  background: #ffd43b;
 }
 
 .hour-cell.mum-period {
-    background: #ff6b9d;
+  background: #c4b5fd;
 }
 
 .hour-cell.dad-period {
-    background: #4dabf7;
+  background: #6ee7b7;
 }
 
 .hour-cell.public-holiday-cell {
-    background: repeating-linear-gradient(
-        45deg,
-        #ffd43b,
-        #ffd43b 5px,
-        #ffa94d 5px,
-        #ffa94d 10px
-    );
+  background: #ffd43b;
 }
 
 .month-section {
